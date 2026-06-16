@@ -1,11 +1,12 @@
 using UnityEngine;
+using UnityEngine.InputSystem; // Добавляем пространство имен новой системы ввода
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Настройки движения")]
     [SerializeField] private float moveSpeed = 5f;
 
-    private Rigidbody2D? rb;
+    private Rigidbody2D rb; // В C# для Unity лучше использовать обычный Rigidbody2D (без ?)
     private Vector2 moveInput;
 
     void Start()
@@ -15,25 +16,31 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // Получаем доступ к текущей клавиатуре
+        var keyboard = Keyboard.current;
+
+        // Если клавиатура не подключена, ничего не делаем
+        if (keyboard == null) return;
+
         // Создаем переменные для направлений
         float moveX = 0f;
         float moveY = 0f;
 
-        // Проверяем нажатие конкретных клавиш W, A, S, D
-        if (Input.GetKey(KeyCode.W)) // Если зажата W
+        // Проверяем нажатие конкретных клавиш W, A, S, D через новую систему
+        if (keyboard.wKey.isPressed) // Если зажата W
         {
             moveY = 1f; // Движение ВВЕРХ
         }
-        else if (Input.GetKey(KeyCode.S)) // Если зажата S
+        else if (keyboard.sKey.isPressed) // Если зажата S
         {
             moveY = -1f; // Движение ВНИЗ
         }
 
-        if (Input.GetKey(KeyCode.D)) // Если зажата D
+        if (keyboard.dKey.isPressed) // Если зажата D
         {
             moveX = 1f; // Движение ВПРАВО
         }
-        else if (Input.GetKey(KeyCode.A)) // Если зажата A
+        else if (keyboard.aKey.isPressed) // Если зажата A
         {
             moveX = -1f; // Движение ВЛЕВО
         }
@@ -46,8 +53,8 @@ public class PlayerController : MonoBehaviour
     {
         if (rb != null)
         {
-            // Применяем скорость к Rigidbody2D квадрата
-            rb.velocity = moveInput * moveSpeed;
+            // Применяем скорость к Rigidbody2D (в Unity 2024+ используется linearVelocity)
+            rb.linearVelocity = moveInput * moveSpeed;
         }
     }
 }
