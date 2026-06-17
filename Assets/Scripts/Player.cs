@@ -53,7 +53,11 @@ public class PlayerController : MonoBehaviour
     {
         if (rb != null)
         {
+<<<<<<< Updated upstream
             // Применяем скорость к Rigidbody2D (в Unity 2024+ используется linearVelocity)
+=======
+            // Применяем скорость к Rigidbody2D квадрата
+>>>>>>> Stashed changes
             rb.linearVelocity = moveInput * moveSpeed;
         }
     }
