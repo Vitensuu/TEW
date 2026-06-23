@@ -119,66 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &694301314
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 694301316}
-  - component: {fileID: 694301315}
-  m_Layer: 0
-  m_Name: DungeonGenerator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &694301315
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 694301314}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 291ab1415b9434eb4a917f893310be63, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Dungeon.DungeonGenerator
-  dungeonWidth: 60
-  dungeonHeight: 44
-  minLeafSize: 18
-  roomPadding: 1
-  minRoomSize: 6
-  maxRoomSize: 15
-  corridorWidth: 2
-  useRandomSeed: 1
-  seed: 0
-  floorTilemap: {fileID: 0}
-  wallTilemap: {fileID: 0}
-  floorTile: {fileID: 11400000, guid: 73e0934756a0e4c54933cc82be709709, type: 2}
-  wallTile: {fileID: 11400000, guid: 9a9a9cb69b3fa4330abbaf5dbd1365a9, type: 2}
-  player: {fileID: 822520968}
-  exitPrefab: {fileID: 0}
-  generateOnStart: 1
---- !u!4 &694301316
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 694301314}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.15865, y: 0.14001, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &822520966
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,10 +405,70 @@ MonoBehaviour:
   target: {fileID: 822520968}
   smoothTime: 0.15
   offset: {x: 0, y: 0}
+--- !u!1 &1998716379
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1998716381}
+  - component: {fileID: 1998716380}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1998716380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1998716379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 291ab1415b9434eb4a917f893310be63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Dungeon.DungeonGenerator
+  dungeonWidth: 60
+  dungeonHeight: 44
+  minLeafSize: 18
+  roomPadding: 1
+  minRoomSize: 6
+  maxRoomSize: 15
+  corridorWidth: 2
+  useRandomSeed: 1
+  seed: 0
+  floorTilemap: {fileID: 0}
+  wallTilemap: {fileID: 0}
+  floorTile: {fileID: 0}
+  wallTile: {fileID: 0}
+  player: {fileID: 0}
+  exitPrefab: {fileID: 0}
+  generateOnStart: 1
+--- !u!4 &1998716381
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1998716379}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -13.9642, y: 1.19977, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 999487241}
   - {fileID: 822520968}
-  - {fileID: 694301316}
+  - {fileID: 1998716381}

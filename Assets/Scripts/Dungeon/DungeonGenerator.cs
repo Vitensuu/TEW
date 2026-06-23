@@ -9,21 +9,23 @@ namespace Dungeon
     /// ставит игрока в стартовую комнату и спавнит выход на следующий этаж
     /// в самой дальней (по графу коридоров) комнате.
     ///
-    /// Если floorTilemap / wallTilemap не назначены в инспекторе — скрипт
-    /// создаст Grid и два слоя Tilemap сам (удобно, пока нет готовой сцены).
+    /// СЛОИ TILEMAP (назначить в инспекторе или создадутся автоматически):
+    ///   floorTilemap  — пол (sortingOrder 0)
+    ///   wallTilemap   — нижняя часть стены / WallFace_Bot (sortingOrder 1)
+    ///   ledgeTilemap  — верхняя часть стены / крыша WallFace_Top (sortingOrder 2)
     /// </summary>
     public class DungeonGenerator : MonoBehaviour
     {
         [Header("Размер подземелья (в тайлах)")]
-        [SerializeField] private int dungeonWidth = 60;
+        [SerializeField] private int dungeonWidth  = 60;
         [SerializeField] private int dungeonHeight = 44;
 
         [Header("BSP")]
         [Tooltip("Минимальный размер листа BSP. Должен быть заметно больше maxRoomSize, " +
                  "чтобы комната помещалась с отступом.")]
-        [SerializeField] private int minLeafSize = 18;
+        [SerializeField] private int minLeafSize  = 18;
         [Tooltip("Отступ от края BSP-листа до края комнаты")]
-        [SerializeField] private int roomPadding = 1;
+        [SerializeField] private int roomPadding  = 1;
 
         [Header("Комнаты (размер в тайлах по каждой стороне)")]
         [SerializeField] private int minRoomSize = 6;
@@ -34,38 +36,50 @@ namespace Dungeon
 
         [Header("Сид генерации")]
         [SerializeField] private bool useRandomSeed = true;
-        [SerializeField] private int seed;
+        [SerializeField] private int  seed;
 
-        [Header("Tilemap (можно оставить пустым — создастся само)")]
+        [Header("Tilemap — можно оставить пустым, создастся автоматически")]
         [SerializeField] private Tilemap floorTilemap;
         [SerializeField] private Tilemap wallTilemap;
-        [SerializeField] private TileBase floorTile;
-        [SerializeField] private TileBase wallTile;
+        [Tooltip("Верхний слой: крыша коробки и верхняя часть лицевой стены")]
+        [SerializeField] private Tilemap ledgeTilemap;
+
+        [Header("Тайлы пола (один или несколько — выбирается по позиции)")]
+        [SerializeField] private TileBase[] floorTiles;
+
+        [Header("Стены")]
+        [Tooltip("ScriptableObject с тайлами. Создать: ПКМ → Create → Dungeon → Wall Tile Set")]
+        [SerializeField] private DungeonWallTileSet wallTileSet;
+        [Tooltip("Запасной тайл стены если wallTileSet не назначен")]
+        [SerializeField] private TileBase wallTileFallback;
 
         [Header("Игрок и выход")]
-        [SerializeField] private Transform player;
+        [SerializeField] private Transform  player;
         [Tooltip("Если не назначен — создастся простая заглушка-триггер")]
         [SerializeField] private GameObject exitPrefab;
 
         [Header("Запуск")]
         [SerializeField] private bool generateOnStart = true;
 
-        private System.Random _rng;
-        private DungeonGrid _grid;
-        private readonly List<RoomInfo> _rooms = new List<RoomInfo>();
+        // ── Внутреннее состояние ────────────────────────────────────────────
+        private System.Random              _rng;
+        private DungeonGrid                _grid;
+        private readonly List<RoomInfo>    _rooms       = new List<RoomInfo>();
         private readonly List<(int a, int b)> _connections = new List<(int a, int b)>();
-        private GameObject _spawnedExit;
+        private GameObject                 _spawnedExit;
 
-        public int FloorNumber { get; private set; } = 1;
-        public Vector3 StartWorldPosition { get; private set; }
-        public Vector3 ExitWorldPosition { get; private set; }
+        public int     FloorNumber         { get; private set; } = 1;
+        public Vector3 StartWorldPosition  { get; private set; }
+        public Vector3 ExitWorldPosition   { get; private set; }
 
+        // ── Unity ───────────────────────────────────────────────────────────
         private void Start()
         {
             if (generateOnStart) Generate();
         }
 
-        /// <summary>Сгенерировать (или перегенерировать) подземелье на текущем этаже.</summary>
+        // ── Публичный API ───────────────────────────────────────────────────
+
         [ContextMenu("Generate")]
         public void Generate()
         {
@@ -75,8 +89,11 @@ namespace Dungeon
 
             _rooms.Clear();
             _connections.Clear();
+
             floorTilemap.ClearAllTiles();
             wallTilemap.ClearAllTiles();
+            ledgeTilemap.ClearAllTiles();
+
             if (_spawnedExit != null) Destroy(_spawnedExit);
 
             _grid = new DungeonGrid(dungeonWidth, dungeonHeight);
@@ -91,14 +108,13 @@ namespace Dungeon
             PlaceStartAndExit();
         }
 
-        /// <summary>Перейти на следующий этаж: увеличить счётчик и перегенерировать.</summary>
         public void GenerateNextFloor()
         {
             FloorNumber++;
             Generate();
         }
 
-        // ---------- BSP -> комнаты и коридоры ----------
+        // ── BSP → комнаты и коридоры ────────────────────────────────────────
 
         private (RoomInfo room, int index) BuildRoomsAndCorridors(BSPNode node)
         {
@@ -110,32 +126,24 @@ namespace Dungeon
                 return (room, _rooms.Count - 1);
             }
 
-            var left = BuildRoomsAndCorridors(node.Left);
+            var left  = BuildRoomsAndCorridors(node.Left);
             var right = BuildRoomsAndCorridors(node.Right);
 
             _grid.CarveCorridor(left.room.Center, right.room.Center, corridorWidth, _rng);
             _connections.Add((left.index, right.index));
 
-            // Поднимаем наверх случайную из двух "якорных" комнат —
-            // именно от неё на следующем уровне дерева пойдёт соединение дальше.
             return _rng.NextDouble() < 0.5 ? left : right;
         }
 
-        /// <summary>
-        /// Создаёт прямоугольную комнату внутри листа BSP.
-        /// Когда появятся готовые комнаты дизайнера — этот метод
-        /// нужно будет заменить на выбор подходящего префаба по размеру листа
-        /// (см. README, раздел "Подключение готовых комнат").
-        /// </summary>
         private RoomInfo CreateRoom(RectInt leaf)
         {
-            int maxW = Mathf.Max(minRoomSize, Mathf.Min(maxRoomSize, leaf.width - roomPadding * 2));
+            int maxW = Mathf.Max(minRoomSize, Mathf.Min(maxRoomSize, leaf.width  - roomPadding * 2));
             int maxH = Mathf.Max(minRoomSize, Mathf.Min(maxRoomSize, leaf.height - roomPadding * 2));
 
             int w = Mathf.Clamp(_rng.Next(minRoomSize, maxRoomSize + 1), minRoomSize, maxW);
             int h = Mathf.Clamp(_rng.Next(minRoomSize, maxRoomSize + 1), minRoomSize, maxH);
 
-            int freeX = leaf.width - w - roomPadding * 2;
+            int freeX = leaf.width  - w - roomPadding * 2;
             int freeY = leaf.height - h - roomPadding * 2;
 
             int x = leaf.x + roomPadding + (freeX > 0 ? _rng.Next(0, freeX + 1) : 0);
@@ -144,35 +152,54 @@ namespace Dungeon
             return new RoomInfo(new RectInt(x, y, w, h));
         }
 
-        // ---------- Tilemap ----------
+        // ── Tilemap ─────────────────────────────────────────────────────────
 
         private void PaintTilemap()
         {
+            // Пол
             for (int x = 0; x < _grid.Width; x++)
+            for (int y = 0; y < _grid.Height; y++)
             {
+                if (_grid[x, y] != TileType.Floor) continue;
+                floorTilemap.SetTile(new Vector3Int(x, y, 0), PickFloor(x, y));
+            }
+
+            // Стены
+            if (wallTileSet != null)
+            {
+                DungeonWallPainter.Paint(_grid, wallTileSet, wallTilemap, ledgeTilemap);
+            }
+            else
+            {
+                // Запасной вариант — один тайл на все стены
+                for (int x = 0; x < _grid.Width; x++)
                 for (int y = 0; y < _grid.Height; y++)
                 {
-                    var cell = _grid[x, y];
-                    if (cell == TileType.None) continue;
-
-                    var pos = new Vector3Int(x, y, 0);
-                    if (cell == TileType.Floor) floorTilemap.SetTile(pos, floorTile);
-                    else if (cell == TileType.Wall) wallTilemap.SetTile(pos, wallTile);
+                    if (_grid[x, y] != TileType.Wall) continue;
+                    wallTilemap.SetTile(new Vector3Int(x, y, 0), wallTileFallback);
                 }
             }
         }
 
-        // ---------- Старт / выход ----------
+        private TileBase PickFloor(int x, int y)
+        {
+            if (floorTiles == null || floorTiles.Length == 0) return null;
+            if (floorTiles.Length == 1) return floorTiles[0];
+            int hash = x * 73856093 ^ y * 19349663;
+            return floorTiles[Mathf.Abs(hash) % floorTiles.Length];
+        }
+
+        // ── Старт / выход ───────────────────────────────────────────────────
 
         private void PlaceStartAndExit()
         {
             if (_rooms.Count == 0) return;
 
-            int startIndex = 0; // первая созданная комната (обход дерева слева)
-            int exitIndex = FindFurthestRoom(startIndex);
+            int startIndex = 0;
+            int exitIndex  = FindFurthestRoom(startIndex);
 
             StartWorldPosition = CellToWorldCenter(_rooms[startIndex].Center);
-            ExitWorldPosition = CellToWorldCenter(_rooms[exitIndex].Center);
+            ExitWorldPosition  = CellToWorldCenter(_rooms[exitIndex].Center);
 
             if (player != null)
                 player.position = StartWorldPosition;
@@ -186,7 +213,6 @@ namespace Dungeon
             trigger.Init(this, player);
         }
 
-        /// <summary>BFS по графу комнат (рёбра = коридоры) — ищет самую дальнюю комнату от старта.</summary>
         private int FindFurthestRoom(int startIndex)
         {
             var adjacency = new List<int>[_rooms.Count];
@@ -222,49 +248,49 @@ namespace Dungeon
         }
 
         private Vector3 CellToWorldCenter(Vector2Int cell)
-        {
-            return floorTilemap.GetCellCenterWorld(new Vector3Int(cell.x, cell.y, 0));
-        }
+            => floorTilemap.GetCellCenterWorld(new Vector3Int(cell.x, cell.y, 0));
 
-        // ---------- Автосоздание Tilemap / заглушки выхода ----------
+        // ── Автосоздание слоёв ──────────────────────────────────────────────
 
         private void EnsureTilemaps()
         {
-            if (floorTilemap != null && wallTilemap != null) return;
+            if (floorTilemap != null && wallTilemap != null && ledgeTilemap != null) return;
 
             var gridGO = new GameObject("Grid (Dungeon)");
-            var grid = gridGO.AddComponent<Grid>();
+            var grid   = gridGO.AddComponent<Grid>();
             grid.cellSize = Vector3.one;
 
-            floorTilemap = CreateTilemapLayer(gridGO.transform, "Floor", 0);
-            wallTilemap = CreateTilemapLayer(gridGO.transform, "Wall", 1);
+            if (floorTilemap  == null) floorTilemap  = CreateTilemapLayer(gridGO.transform, "Floor",  0);
+            if (wallTilemap   == null) wallTilemap   = CreateTilemapLayer(gridGO.transform, "Wall",   1);
+            if (ledgeTilemap  == null) ledgeTilemap  = CreateTilemapLayer(gridGO.transform, "Ledge",  2);
         }
 
-        private Tilemap CreateTilemapLayer(Transform parent, string name, int sortingOrder)
+        private static Tilemap CreateTilemapLayer(Transform parent, string layerName, int sortingOrder)
         {
-            var go = new GameObject(name);
+            var go = new GameObject(layerName);
             go.transform.SetParent(parent);
-            var tilemap = go.AddComponent<Tilemap>();
+            var tilemap  = go.AddComponent<Tilemap>();
             var renderer = go.AddComponent<TilemapRenderer>();
             renderer.sortingOrder = sortingOrder;
             return tilemap;
         }
 
-        private GameObject CreateDefaultExitMarker(Vector3 position)
+        private static GameObject CreateDefaultExitMarker(Vector3 position)
         {
             var go = new GameObject("Exit (auto)");
             go.transform.position = position;
 
             var texture = Texture2D.whiteTexture;
-            var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
+            var sr      = go.AddComponent<SpriteRenderer>();
+            sr.sprite = Sprite.Create(texture,
+                new Rect(0, 0, texture.width, texture.height),
                 new Vector2(0.5f, 0.5f), texture.width);
-            sr.color = new Color(1f, 0.85f, 0.1f, 0.85f);
+            sr.color        = new Color(1f, 0.85f, 0.1f, 0.85f);
             sr.sortingOrder = 10;
             go.transform.localScale = Vector3.one * 0.8f;
 
-            var collider = go.AddComponent<BoxCollider2D>();
-            collider.isTrigger = true;
+            var col = go.AddComponent<BoxCollider2D>();
+            col.isTrigger = true;
 
             return go;
         }
