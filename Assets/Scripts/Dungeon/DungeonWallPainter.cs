@@ -6,23 +6,32 @@ namespace Dungeon
     /// <summary>
     /// Расставляет тайлы стен на основе соседей в DungeonGrid.
     ///
-    /// СТРУКТУРА КОРОБКИ (тип 1) — 4 строки по Y, пол под строками 1-2:
+    /// ═══ СТРУКТУРА ТИП 1 (снаружи) ═══
     ///
-    ///   Y+3: [CornerTopLeft]  [WallTop]      [CornerTopRight]   ← строка 1 (крыша)
-    ///   Y+2: [WallLeft]       [Floor!]        [WallRight]       ← строка 2 (боковые)
-    ///   Y+1: [FaceLeft_Top]   [WallFace_Top]  [FaceRight_Top]   ← строка 3 (лицо верх)
-    ///   Y+0: [FaceLeft_Bot]   [WallFace_Bot]  [FaceRight_Bot]   ← строка 4 (лицо низ)
+    ///   Y+3: [CornerTopLeft]   [WallTop...]      [CornerTopRight]    ← строка 1, ledge
+    ///   Y+2: [WallLeft...]     [пустой]           [WallRight...]      ← строка 2, ledge
+    ///   Y+1: [FaceLeft_Top]    [WallFace_Top...]  [FaceRight_Top]     ← строка 3, wall
+    ///   Y+0: [FaceLeft_Bot]    [WallFace_Bot...]  [FaceRight_Bot]     ← строка 4, wall
+    ///   Пол рисуется поверх Y+3 и Y+2 (другой Tilemap-слой).
     ///
-    ///   Пол (floorTilemap) рисуется на Y+3 и Y+2 поверх wallTilemap.
+    /// ═══ СТРУКТУРА ТИП 2 (изнутри) ═══
     ///
-    /// СЛОИ Tilemap (sortingOrder):
-    ///   floorTilemap  (0) — пол
-    ///   wallTilemap   (1) — лицевая стена (строки 3-4) + тип2 стены
-    ///   ledgeTilemap  (2) — крыша и боковые коробки (строки 1-2)
+    ///   тайл1: [T2_CornerTopLeft] [T2_WallLeft_Top]  [WallFace_Top...] [T2_WallRight_Top] [T2_CornerTopRight]
+    ///   тайл2: [T2_SideRight...]  [T2_WallLeft_Bot]  [WallFace_Bot...] [T2_WallRight_Bot] [T2_SideLeft...]
+    ///   тайл3: [T2_SideRight...]  [пустой]           [пустой]          [пустой]           [T2_SideLeft...]
+    ///   тайл4: [T2_CornerBotLeft] [T2_WallBot...]                                          [T2_CornerBotRight]
     ///
-    /// ЛОГИКА ОПРЕДЕЛЕНИЯ:
-    ///   Тип 1 (снаружи) — стена с полом на ЮГЕ (y-1). Игрок смотрит снизу.
-    ///   Тип 2 (изнутри) — стена с полом на СЕВЕРЕ (y+1). Игрок внутри.
+    ///   Боковые для тип2:
+    ///     пол слева  (fW) → стена справа → t2_SideRight (idx 44,45,46,8)
+    ///     пол справа (fE) → стена слева  → t2_SideLeft  (idx 47,48,49,9)
+    ///
+    /// ═══ ЛОГИКА ОПРЕДЕЛЕНИЯ ТИПА ═══
+    ///   Тип 1 — стена с полом на ЮГЕ (y-1). Игрок смотрит снизу.
+    ///   Тип 2 — стена с полом на СЕВЕРЕ (y+1). Игрок внутри.
+    ///
+    /// ═══ СЛОИ ═══
+    ///   wallTilemap  (1) — лицевые стены (строки 3-4 тип1) + все стены тип2
+    ///   ledgeTilemap (2) — крыша и боковые коробки (строки 1-2 тип1)
     /// </summary>
     public static class DungeonWallPainter
     {
@@ -55,71 +64,59 @@ namespace Dungeon
             bool wE  = IsWall(grid, x + 1, y    );
             bool wW  = IsWall(grid, x - 1, y    );
 
-            // Пол на две клетки южнее (строка 2 коробки)
-            bool fS2 = IsFloor(grid, x, y - 2);
-            // Стена на две клетки южнее (строка 3 — лицевая)
-            bool wS2 = IsWall(grid, x, y - 2);
+            bool fS2 = IsFloor(grid, x, y - 2);  // пол в 2х клетках южнее
+            bool fN2 = IsFloor(grid, x, y + 2);  // пол в 2х клетках севернее
 
             var pos = new Vector3Int(x, y, 0);
 
             // ══════════════════════════════════════════════════════════════════
-            // ТИП 1 — СТРОКА 4: лицевая стена низ (y, пол на y-1)
-            // Это самая нижняя видимая строка коробки
+            // ТИП 1 — СТРОКА 4: лицевая стена низ (пол на y-1)
             // ══════════════════════════════════════════════════════════════════
             if (fS && !fN)
             {
-                // Левый угол лицевой низ
                 if (!wW && wE)
                 {
                     wall.SetTile(pos, ts.t1_FaceLeft_Bot);
                     return;
                 }
-                // Правый угол лицевой низ
                 if (wW && !wE)
                 {
                     wall.SetTile(pos, ts.t1_FaceRight_Bot);
                     return;
                 }
-                // Середина лицевой низ
                 wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallFace_Bot, x, y));
                 return;
             }
 
             // ══════════════════════════════════════════════════════════════════
-            // ТИП 1 — СТРОКА 3: лицевая стена верх (y, пол на y-2)
+            // ТИП 1 — СТРОКА 3: лицевая стена верх (пол на y-2)
             // ══════════════════════════════════════════════════════════════════
             if (!fS && !fN && fS2 && wS)
             {
-                // Левый угол лицевой верх
                 if (!wW && wE)
                 {
                     wall.SetTile(pos, ts.t1_FaceLeft_Top);
                     return;
                 }
-                // Правый угол лицевой верх
                 if (wW && !wE)
                 {
                     wall.SetTile(pos, ts.t1_FaceRight_Top);
                     return;
                 }
-                // Середина лицевой верх
                 wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallFace_Top, x, y));
                 return;
             }
 
             // ══════════════════════════════════════════════════════════════════
-            // ТИП 1 — СТРОКА 2: боковые стены + пол под ними
-            // (y, пол на y-3 или стена-лицевая на y-1 и y-2)
+            // ТИП 1 — СТРОКА 2: боковые стены коробки (ledge)
             // ══════════════════════════════════════════════════════════════════
             if (!fS && !fN && !fE && !fW && wS && IsWall(grid, x, y - 1))
             {
-                // Левая боковая стена коробки
                 if (!wW && wE)
                 {
                     ledge.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallLeft, x, y));
                     return;
                 }
-                // Правая боковая стена коробки
                 if (wW && !wE)
                 {
                     ledge.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallRight, x, y));
@@ -128,87 +125,133 @@ namespace Dungeon
             }
 
             // ══════════════════════════════════════════════════════════════════
-            // ТИП 1 — СТРОКА 1: верх коробки / крыша
-            // (y, стена на y-1 которая является боковой строкой 2)
+            // ТИП 1 — СТРОКА 1: верх коробки / крыша (ledge)
             // ══════════════════════════════════════════════════════════════════
-            if (!fS && !fN && !fE && !fW && wS && IsWall(grid, x, y - 2) && IsWall(grid, x, y - 1))
+            if (!fS && !fN && !fE && !fW && wS && IsWall(grid, x, y - 1) && IsWall(grid, x, y - 2))
             {
-                // Верхний левый угол
                 if (!wW && wE)
                 {
                     ledge.SetTile(pos, ts.t1_CornerTopLeft);
                     return;
                 }
-                // Верхний правый угол
                 if (wW && !wE)
                 {
                     ledge.SetTile(pos, ts.t1_CornerTopRight);
                     return;
                 }
-                // Верхняя стена (крыша)
                 ledge.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallTop, x, y));
                 return;
             }
 
             // ══════════════════════════════════════════════════════════════════
-            // ТИП 2 — верхняя стена изнутри (пол с севера, y+1)
+            // ТИП 2 — СТРОКА 1: верхний ряд изнутри (пол на y+1)
+            //
+            //   тайл1.1 = T2_CornerTopLeft   — нет стены слева  (!wW && wE)
+            //   тайл1.2 = T2_WallLeft_Top    — стена слева, но пол слева (fW)
+            //   тайл1.3 = WallFace_Top       — середина верхней стены
+            //   тайл1.4 = T2_WallRight_Top   — стена справа, но пол справа (fE)
+            //   тайл1.5 = T2_CornerTopRight  — нет стены справа (wW && !wE)
             // ══════════════════════════════════════════════════════════════════
             if (fN && !fS)
             {
-                // Верхний левый угол изнутри
+                // тайл1.1 — верхний левый угол изнутри
                 if (!wW && wE)
                 {
                     wall.SetTile(pos, ts.t2_CornerTopLeft);
                     return;
                 }
-                // Верхний правый угол изнутри (зеркало, пока тот же тайл)
+                // тайл1.5 — верхний правый угол изнутри (idx 7)
                 if (wW && !wE)
                 {
-                    wall.SetTile(pos, ts.t2_CornerTopLeft);
+                    wall.SetTile(pos, ts.t2_CornerTopRight);
                     return;
                 }
-                // Середина верхней стены изнутри
+                // тайл1.2 — верх левой боковой (слева боковая стена, примыкает к углу)
+                if (wW && IsFloor(grid, x - 1, y + 1))
+                {
+                    wall.SetTile(pos, ts.t2_WallLeft_Top);
+                    return;
+                }
+                // тайл1.4 — верх правой боковой (справа боковая стена, примыкает к углу)
+                if (wE && IsFloor(grid, x + 1, y + 1))
+                {
+                    wall.SetTile(pos, ts.t2_WallRight_Top);
+                    return;
+                }
+                // тайл1.3 — верхняя стена середина (те же тайлы что и тип1 лицевая верх)
                 wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallFace_Top, x, y));
                 return;
             }
 
             // ══════════════════════════════════════════════════════════════════
-            // ТИП 2 — нижняя стена изнутри (1 тайл, пол на y+2)
+            // ТИП 2 — СТРОКА 4: нижний ряд изнутри (стена на y+1, пол на y+2)
+            //
+            //   тайл4.1 = T2_CornerBotLeft   — нет стены слева  (!wW && wE)
+            //   тайл4.2-4.4 = T2_WallBot     — середина нижней стены
+            //   тайл4.5 = T2_CornerBotRight  — нет стены справа (wW && !wE)
             // ══════════════════════════════════════════════════════════════════
-            if (!fN && IsFloor(grid, x, y + 2) && wN)
+            if (!fN && fN2 && wN)
             {
+                // тайл4.1 — нижний левый угол изнутри
                 if (!wW && wE)
                 {
                     wall.SetTile(pos, ts.t2_CornerBotLeft);
                     return;
                 }
+                // тайл4.5 — нижний правый угол изнутри
                 if (wW && !wE)
                 {
                     wall.SetTile(pos, ts.t2_CornerBotRight);
                     return;
                 }
-                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t2_WallBot, x, y));
+                // тайл4.2-4.4 — нижняя стена середина (те же тайлы что и тип1 лицевая низ)
+                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallFace_Bot, x, y));
                 return;
             }
 
             // ══════════════════════════════════════════════════════════════════
-            // ТИП 2 — боковые стены изнутри
+            // ТИП 2 — СТРОКИ 2-3: боковые стены изнутри
+            //
+            //   ВНИМАНИЕ: для тип2 направление ОБРАТНОЕ относительно тип1!
+            //   пол слева  (fW) → игрок видит правую стену → t2_SideRight (44,45,46,8)
+            //   пол справа (fE) → игрок видит левую стену  → t2_SideLeft  (47,48,49,9)
+            //
+            //   Строка 2 отличается от строки 3 тайлами тайл2.2 и тайл2.4:
+            //   тайл2.2 = T2_WallLeft_Bot  (idx 11) — если снизу стена (wS) типа 4
+            //   тайл2.4 = T2_WallRight_Bot (idx 13) — если снизу стена (wS) типа 4
             // ══════════════════════════════════════════════════════════════════
-            if (fE && !fW && !fN && !fS)
-            {
-                bool isTop = IsWall(grid, x, y + 1) && IsFloor(grid, x, y + 2);
-                wall.SetTile(pos, isTop ? ts.t2_WallRight_Top : ts.t2_WallRight_Bot);
-                return;
-            }
+
+            // Боковая стена тип2 — пол слева (fW)
             if (fW && !fE && !fN && !fS)
             {
-                bool isTop = IsWall(grid, x, y + 1) && IsFloor(grid, x, y + 2);
-                wall.SetTile(pos, isTop ? ts.t2_WallLeft_Top : ts.t2_WallLeft_Bot);
+                // тайл2.2 — низ левой боковой (примыкает к нижней стене снизу)
+                // Условие: снизу стена, и за два шага вниз пол (это строка 4 нижней стены)
+                if (wS && IsFloor(grid, x, y - 2))
+                {
+                    wall.SetTile(pos, ts.t2_WallLeft_Bot);
+                    return;
+                }
+                // тайл3.1 / тайл2.1 — обычная боковая правая стена
+                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t2_SideRight, x, y));
+                return;
+            }
+
+            // Боковая стена тип2 — пол справа (fE)
+            if (fE && !fW && !fN && !fS)
+            {
+                // тайл2.4 — низ правой боковой (примыкает к нижней стене снизу)
+                if (wS && IsFloor(grid, x, y - 2))
+                {
+                    wall.SetTile(pos, ts.t2_WallRight_Bot);
+                    return;
+                }
+                // тайл3.5 / тайл2.5 — обычная боковая левая стена
+                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t2_SideLeft, x, y));
                 return;
             }
 
             // ══════════════════════════════════════════════════════════════════
-            // КОРИДОРЫ — боковые стены (пол слева или справа)
+            // КОРИДОРЫ — боковые стены (пол с одной стороны, есть пол сверху или снизу)
             // ══════════════════════════════════════════════════════════════════
             if (fE && !fW)
             {

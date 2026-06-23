@@ -66,6 +66,7 @@ namespace Dungeon.Editor
 
             // ── ТИП 1 — строка 3: лицевая верх ──────────────────────────────
             ts.t1_FaceLeft_Top  = Load("TX Tileset Wall_15");
+            ts.t1_FaceLeft_Top2 = Load("TX Tileset Wall_57");
             ts.t1_WallFace_Top = new TileBase[]
             {
                 Load("TX Tileset Wall_16"),
@@ -79,10 +80,12 @@ namespace Dungeon.Editor
                 Load("TX Tileset Wall_40"),
                 Load("TX Tileset Wall_42"),
             };
-            ts.t1_FaceRight_Top = Load("TX Tileset Wall_17");
+            ts.t1_FaceRight_Top  = Load("TX Tileset Wall_17");
+            ts.t1_FaceRight_Top2 = Load("TX Tileset Wall_58");
 
             // ── ТИП 1 — строка 4: лицевая низ ───────────────────────────────
             ts.t1_FaceLeft_Bot  = Load("TX Tileset Wall_23");
+            ts.t1_FaceLeft_Bot2 = Load("TX Tileset Wall_59");
             ts.t1_WallFace_Bot = new TileBase[]
             {
                 Load("TX Tileset Wall_24"),
@@ -96,47 +99,66 @@ namespace Dungeon.Editor
                 Load("TX Tileset Wall_41"),
                 Load("TX Tileset Wall_43"),
             };
-            ts.t1_FaceRight_Bot = Load("TX Tileset Wall_25");
+            ts.t1_FaceRight_Bot  = Load("TX Tileset Wall_25");
+            ts.t1_FaceRight_Bot2 = Load("TX Tileset Wall_60");
 
-            // ── Доп. угловые ─────────────────────────────────────────────────
+            // ── ТИП 1 — нижние части верхних угловых тайлов ─────────────────
             ts.t1_CornerTopLeft_Bot  = Load("TX Tileset Wall_53");
             ts.t1_CornerTopRight_Bot = Load("TX Tileset Wall_54");
-            ts.t1_FaceLeft_Top2      = Load("TX Tileset Wall_57");
-            ts.t1_FaceRight_Top2     = Load("TX Tileset Wall_58");
-            ts.t1_FaceLeft_Bot2      = Load("TX Tileset Wall_59");
-            ts.t1_FaceRight_Bot2     = Load("TX Tileset Wall_60");
 
-            // ── ТИП 2 — изнутри ──────────────────────────────────────────────
+            // ── ТИП 2 — строка 1: верхний ряд изнутри ───────────────────────
+            // тайл1.1 = 3, тайл1.2 = 4, тайл1.3 = общие WallFace_Top,
+            // тайл1.4 = 6, тайл1.5 = 7
             ts.t2_CornerTopLeft  = Load("TX Tileset Wall_3");
             ts.t2_WallLeft_Top   = Load("TX Tileset Wall_4");
-            ts.t2_WallLeft_Bot   = Load("TX Tileset Wall_11");
+            // t2 тайл1.3 — использует t1_WallFace_Top (уже заполнен выше)
             ts.t2_WallRight_Top  = Load("TX Tileset Wall_6");
+            ts.t2_CornerTopRight = Load("TX Tileset Wall_7");
+
+            // ── ТИП 2 — строка 2: переходный ряд боковых стен ───────────────
+            // тайл2.2 = 11, тайл2.3 = общие WallFace_Bot, тайл2.4 = 13
+            ts.t2_WallLeft_Bot   = Load("TX Tileset Wall_11");
+            // t2 тайл2.3 — использует t1_WallFace_Bot (уже заполнен выше)
             ts.t2_WallRight_Bot  = Load("TX Tileset Wall_13");
-            ts.t2_CornerBotLeft  = Load("TX Tileset Wall_18");
-            ts.t2_CornerBotRight = Load("TX Tileset Wall_22");
-            ts.t2_WallBot = new TileBase[]
+
+            // ── ТИП 2 — строки 2-3: боковые стены ───────────────────────────
+            // ВНИМАНИЕ: для тип2 направление ОБРАТНОЕ относительно тип1!
+            // т2_SideRight (пол слева, стена справа) = idx 44,45,46,8
+            // т2_SideLeft  (пол справа, стена слева) = idx 47,48,49,9
+            ts.t2_SideRight = new TileBase[]
             {
-                Load("TX Tileset Wall_1"),
-                Load("TX Tileset Wall_19"),
-                Load("TX Tileset Wall_20"),
-                Load("TX Tileset Wall_21"),
-                Load("TX Tileset Wall_50"),
-                Load("TX Tileset Wall_51"),
-                Load("TX Tileset Wall_52"),
+                Load("TX Tileset Wall_44"),
+                Load("TX Tileset Wall_45"),
+                Load("TX Tileset Wall_46"),
+                Load("TX Tileset Wall_8"),
+            };
+            ts.t2_SideLeft = new TileBase[]
+            {
+                Load("TX Tileset Wall_47"),
+                Load("TX Tileset Wall_48"),
+                Load("TX Tileset Wall_49"),
+                Load("TX Tileset Wall_9"),
             };
 
-            // ── БОКОВЫЕ общие ─────────────────────────────────────────────────
+            // ── ТИП 2 — строка 4: нижний ряд изнутри ────────────────────────
+            // тайл4.2-4.4 использует t1_WallFace_Bot (уже заполнен выше)
+            ts.t2_CornerBotLeft  = Load("TX Tileset Wall_18");
+            ts.t2_CornerBotRight = Load("TX Tileset Wall_22");
+
+            // ── КОРИДОРЫ — боковые стены общие ───────────────────────────────
             ts.sideWall_L = new TileBase[]
             {
                 Load("TX Tileset Wall_44"),
                 Load("TX Tileset Wall_45"),
                 Load("TX Tileset Wall_46"),
+                Load("TX Tileset Wall_8"),
             };
             ts.sideWall_R = new TileBase[]
             {
                 Load("TX Tileset Wall_47"),
                 Load("TX Tileset Wall_48"),
                 Load("TX Tileset Wall_49"),
+                Load("TX Tileset Wall_9"),
             };
 
             EditorUtility.SetDirty(ts);
@@ -171,18 +193,27 @@ namespace Dungeon.Editor
             void Check(TileBase t) { if (!t) n++; }
             void CheckArr(TileBase[] arr) { if (arr != null) foreach (var t in arr) if (!t) n++; }
 
-            Check(ts.t1_CornerTopLeft);   Check(ts.t1_CornerTopRight);
-            Check(ts.t1_FaceLeft_Top);    Check(ts.t1_FaceRight_Top);
-            Check(ts.t1_FaceLeft_Bot);    Check(ts.t1_FaceRight_Bot);
+            // ТИП 1
+            Check(ts.t1_CornerTopLeft);     Check(ts.t1_CornerTopRight);
             Check(ts.t1_CornerTopLeft_Bot); Check(ts.t1_CornerTopRight_Bot);
-            Check(ts.t1_FaceLeft_Top2);   Check(ts.t1_FaceRight_Top2);
-            Check(ts.t1_FaceLeft_Bot2);   Check(ts.t1_FaceRight_Bot2);
-            Check(ts.t2_CornerTopLeft);   Check(ts.t2_CornerBotLeft);  Check(ts.t2_CornerBotRight);
-            Check(ts.t2_WallLeft_Top);    Check(ts.t2_WallLeft_Bot);
-            Check(ts.t2_WallRight_Top);   Check(ts.t2_WallRight_Bot);
-            CheckArr(ts.t1_WallTop);      CheckArr(ts.t1_WallLeft);    CheckArr(ts.t1_WallRight);
-            CheckArr(ts.t1_WallFace_Top); CheckArr(ts.t1_WallFace_Bot);
-            CheckArr(ts.t2_WallBot);      CheckArr(ts.sideWall_L);     CheckArr(ts.sideWall_R);
+            Check(ts.t1_FaceLeft_Top);      Check(ts.t1_FaceLeft_Top2);
+            Check(ts.t1_FaceRight_Top);     Check(ts.t1_FaceRight_Top2);
+            Check(ts.t1_FaceLeft_Bot);      Check(ts.t1_FaceLeft_Bot2);
+            Check(ts.t1_FaceRight_Bot);     Check(ts.t1_FaceRight_Bot2);
+            CheckArr(ts.t1_WallTop);
+            CheckArr(ts.t1_WallLeft);       CheckArr(ts.t1_WallRight);
+            CheckArr(ts.t1_WallFace_Top);   CheckArr(ts.t1_WallFace_Bot);
+
+            // ТИП 2
+            Check(ts.t2_CornerTopLeft);     Check(ts.t2_CornerTopRight);
+            Check(ts.t2_WallLeft_Top);      Check(ts.t2_WallRight_Top);
+            Check(ts.t2_WallLeft_Bot);      Check(ts.t2_WallRight_Bot);
+            Check(ts.t2_CornerBotLeft);     Check(ts.t2_CornerBotRight);
+            CheckArr(ts.t2_SideRight);      CheckArr(ts.t2_SideLeft);
+
+            // КОРИДОРЫ
+            CheckArr(ts.sideWall_L);        CheckArr(ts.sideWall_R);
+
             return n;
         }
     }

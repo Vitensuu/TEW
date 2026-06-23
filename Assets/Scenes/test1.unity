@@ -416,7 +416,7 @@ GameObject:
   - component: {fileID: 1998716381}
   - component: {fileID: 1998716380}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: DungeonGenerator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -445,9 +445,13 @@ MonoBehaviour:
   seed: 0
   floorTilemap: {fileID: 0}
   wallTilemap: {fileID: 0}
-  floorTile: {fileID: 0}
-  wallTile: {fileID: 0}
-  player: {fileID: 0}
+  ledgeTilemap: {fileID: 0}
+  floorTiles:
+  - {fileID: 11400000, guid: bded2fc425ca84e6a8e461d9e27a73cb, type: 2}
+  - {fileID: 11400000, guid: 73e0934756a0e4c54933cc82be709709, type: 2}
+  wallTileSet: {fileID: 11400000, guid: a21f99cce9b734131a6b25a355c4a329, type: 2}
+  wallTileFallback: {fileID: 0}
+  player: {fileID: 822520968}
   exitPrefab: {fileID: 0}
   generateOnStart: 1
 --- !u!4 &1998716381
