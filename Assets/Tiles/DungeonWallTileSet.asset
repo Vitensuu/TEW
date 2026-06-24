@@ -80,6 +80,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a1673ed41214d45f68f9236d8f058c06, type: 2}
   - {fileID: 11400000, guid: 96fcb702f193347d694be0afd7bb3fa9, type: 2}
   t2_CornerBotLeft: {fileID: 11400000, guid: 37f8914a1aede4224aa7e698f4ad288d, type: 2}
+  t2_WallBot:
+  - {fileID: 11400000, guid: 9a9a9cb69b3fa4330abbaf5dbd1365a9, type: 2}
+  - {fileID: 11400000, guid: 19325f6f580e24f3ab9d0ea68ee701d2, type: 2}
+  - {fileID: 11400000, guid: 2173590e374454853a8ef6233686de52, type: 2}
+  - {fileID: 11400000, guid: 3b2f5c588321e4f9aa1ba7bdcdbf564c, type: 2}
+  - {fileID: 11400000, guid: 7ef7b38c224434ad89e236220dfee583, type: 2}
+  - {fileID: 11400000, guid: 95da3b482a35c415ca953587c79b7024, type: 2}
+  - {fileID: 11400000, guid: d8012f375675f49dcb7ba51ccb4737b5, type: 2}
   t2_CornerBotRight: {fileID: 11400000, guid: a79cf45719fe143cf8c89a87cc411a14, type: 2}
   sideWall_L:
   - {fileID: 11400000, guid: 3ff496cca82b64eea957473f6e66af22, type: 2}

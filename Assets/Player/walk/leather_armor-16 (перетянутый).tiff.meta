@@ -1,19 +1,19 @@
 fileFormatVersion: 2
-guid: 2d4e7be5a3a00694eb4a195169e3c0aa
+guid: 34823631efe894a89a43a22a7837ac1f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1549508750607559342
-    second: TX Player_0
+      213: -5591603995743424324
+    second: "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_0"
   - first:
-      213: -6957052691073287718
-    second: TX Player_1
+      213: -880508245440728267
+    second: "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_1"
   - first:
-      213: 2185052477942719528
-    second: TX Player_2
+      213: 1215734335813554654
+    second: "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_2"
   - first:
-      213: -1844808789431545801
-    second: TX Player_3
+      213: -3788862988218804716
+    second: "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_3"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -82,8 +82,8 @@ TextureImporter:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
+    resizeAlgorithm: 1
+    textureFormat: 4
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
@@ -122,89 +122,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: TX Player_0
+      name: "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_0"
       rect:
         serializedVersion: 2
-        x: 5
-        y: 69
-        width: 23
-        height: 46
+        x: 0
+        y: 192
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: eaaa250cff5f08510800000000000000
-      internalID: 1549508750607559342
+      spriteID: cb0fe0d9ac1a662b0800000000000000
+      internalID: -5591603995743424324
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: TX Player_1
+      name: "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_1"
       rect:
         serializedVersion: 2
-        x: 37
-        y: 69
-        width: 23
-        height: 50
+        x: 0
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ad9b6e00075937f90800000000000000
-      internalID: -6957052691073287718
+      spriteID: 533f3b87a6ec7c3f0800000000000000
+      internalID: -880508245440728267
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: TX Player_2
+      name: "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_2"
       rect:
         serializedVersion: 2
-        x: 68
-        y: 69
-        width: 23
-        height: 47
+        x: 0
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 824ec5bd6add25e10800000000000000
-      internalID: 2185052477942719528
+      spriteID: ed1996befe72fd010800000000000000
+      internalID: 1215734335813554654
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: TX Player_3
+      name: "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_3"
       rect:
         serializedVersion: 2
-        x: 98
-        y: 67
-        width: 29
-        height: 30
+        x: 0
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7301a632e2ce566e0800000000000000
-      internalID: -1844808789431545801
+      spriteID: 416d79cbf214b6bc0800000000000000
+      internalID: -3788862988218804716
       vertices: []
       indices: 
       edges: []
@@ -213,7 +213,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: ca0f5d023f8cd448eb5a556a4562f6e9
     internalID: 0
     vertices: []
     indices: 
@@ -221,12 +221,14 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":4.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      TX Player_0: 1549508750607559342
-      TX Player_1: -6957052691073287718
-      TX Player_2: 2185052477942719528
-      TX Player_3: -1844808789431545801
+      "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_0": -5591603995743424324
+      "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_1": -880508245440728267
+      "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_2": 1215734335813554654
+      "leather_armor-16 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_3": -3788862988218804716
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

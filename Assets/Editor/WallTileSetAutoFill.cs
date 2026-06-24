@@ -143,6 +143,16 @@ namespace Dungeon.Editor
             // ── ТИП 2 — строка 4: нижний ряд изнутри ────────────────────────
             // тайл4.2-4.4 использует t1_WallFace_Bot (уже заполнен выше)
             ts.t2_CornerBotLeft  = Load("TX Tileset Wall_18");
+            ts.t2_WallBot = new TileBase[]
+            {
+                Load("TX Tileset Wall_1"),
+                Load("TX Tileset Wall_19"),
+                Load("TX Tileset Wall_20"),
+                Load("TX Tileset Wall_21"),
+                Load("TX Tileset Wall_50"),
+                Load("TX Tileset Wall_51"),
+                Load("TX Tileset Wall_52"),
+            };
             ts.t2_CornerBotRight = Load("TX Tileset Wall_22");
 
             // ── КОРИДОРЫ — боковые стены общие ───────────────────────────────
@@ -210,6 +220,7 @@ namespace Dungeon.Editor
             Check(ts.t2_WallLeft_Bot);      Check(ts.t2_WallRight_Bot);
             Check(ts.t2_CornerBotLeft);     Check(ts.t2_CornerBotRight);
             CheckArr(ts.t2_SideRight);      CheckArr(ts.t2_SideLeft);
+            CheckArr(ts.t2_WallBot);
 
             // КОРИДОРЫ
             CheckArr(ts.sideWall_L);        CheckArr(ts.sideWall_R);

@@ -1,276 +1,158 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace Dungeon
 {
     /// <summary>
-    /// Расставляет тайлы стен на основе соседей в DungeonGrid.
+    /// Тип 2 (top-down, вид изнутри).
     ///
-    /// ═══ СТРУКТУРА ТИП 1 (снаружи) ═══
+    /// Для комнаты floor x=fx..fx+fw-1, y=fy..fy+fh-1:
     ///
-    ///   Y+3: [CornerTopLeft]   [WallTop...]      [CornerTopRight]    ← строка 1, ledge
-    ///   Y+2: [WallLeft...]     [пустой]           [WallRight...]      ← строка 2, ledge
-    ///   Y+1: [FaceLeft_Top]    [WallFace_Top...]  [FaceRight_Top]     ← строка 3, wall
-    ///   Y+0: [FaceLeft_Bot]    [WallFace_Bot...]  [FaceRight_Bot]     ← строка 4, wall
-    ///   Пол рисуется поверх Y+3 и Y+2 (другой Tilemap-слой).
+    ///  y=fy+fh  (WALL): [CornerTL][WL_Top][Face_Top...][WR_Top][CornerTR]
+    ///                    fx-1       fx      fx+1..fw-2   fx+fw-1  fx+fw
     ///
-    /// ═══ СТРУКТУРА ТИП 2 (изнутри) ═══
+    ///  y=fy+fh-1 (FLOOR строка, тайлы 2.x рисуются поверх пола на wallTilemap):
+    ///            (WALL): [SideL ]                                [SideR ]
+    ///            (FLOOR): [WL_Bot][Face_Bot...              ][WR_Bot]
     ///
-    ///   тайл1: [T2_CornerTopLeft] [T2_WallLeft_Top]  [WallFace_Top...] [T2_WallRight_Top] [T2_CornerTopRight]
-    ///   тайл2: [T2_SideRight...]  [T2_WallLeft_Bot]  [WallFace_Bot...] [T2_WallRight_Bot] [T2_SideLeft...]
-    ///   тайл3: [T2_SideRight...]  [пустой]           [пустой]          [пустой]           [T2_SideLeft...]
-    ///   тайл4: [T2_CornerBotLeft] [T2_WallBot...]                                          [T2_CornerBotRight]
+    ///  y=fy..fy+fh-2 (WALL): [SideL]                          [SideR]
     ///
-    ///   Боковые для тип2:
-    ///     пол слева  (fW) → стена справа → t2_SideRight (idx 44,45,46,8)
-    ///     пол справа (fE) → стена слева  → t2_SideLeft  (idx 47,48,49,9)
-    ///
-    /// ═══ ЛОГИКА ОПРЕДЕЛЕНИЯ ТИПА ═══
-    ///   Тип 1 — стена с полом на ЮГЕ (y-1). Игрок смотрит снизу.
-    ///   Тип 2 — стена с полом на СЕВЕРЕ (y+1). Игрок внутри.
-    ///
-    /// ═══ СЛОИ ═══
-    ///   wallTilemap  (1) — лицевые стены (строки 3-4 тип1) + все стены тип2
-    ///   ledgeTilemap (2) — крыша и боковые коробки (строки 1-2 тип1)
+    ///  y=fy-1   (WALL): [CornerBL][WallBot...            ][CornerBR]
+    ///                    fx-1       fx..fx+fw-1              fx+fw
     /// </summary>
     public static class DungeonWallPainter
     {
         public static void Paint(
-            DungeonGrid        grid,
-            DungeonWallTileSet ts,
-            Tilemap            wallTilemap,
-            Tilemap            ledgeTilemap)
+            DungeonGrid                   grid,
+            DungeonWallTileSet            ts,
+            Tilemap                       wallTilemap,
+            Tilemap                       ledgeTilemap,
+            IReadOnlyList<RoomInfo>       rooms        = null,
+            Tilemap                       floorTilemap = null,
+            System.Func<int,int,TileBase> pickFloor    = null)
         {
+            var painted = new HashSet<Vector2Int>();
+
+            if (rooms != null)
+                foreach (var room in rooms)
+                    PaintRoom(ts, wallTilemap, room.Area, painted);
+
+            // Коридоры — оставшиеся wall-клетки
             for (int x = 0; x < grid.Width; x++)
             for (int y = 0; y < grid.Height; y++)
             {
                 if (grid[x, y] != TileType.Wall) continue;
-                PaintCell(grid, ts, wallTilemap, ledgeTilemap, x, y);
+                if (painted.Contains(new Vector2Int(x, y))) continue;
+                PaintCorridorWall(grid, ts, wallTilemap, x, y);
             }
         }
 
-        private static void PaintCell(
-            DungeonGrid grid, DungeonWallTileSet ts,
-            Tilemap wall, Tilemap ledge,
-            int x, int y)
+        // ── Рамка одной комнаты ────────────────────────────────────────────────
+
+        static void PaintRoom(DungeonWallTileSet ts, Tilemap wall,
+            RectInt area, HashSet<Vector2Int> painted)
         {
-            bool fN  = IsFloor(grid, x,     y + 1);
-            bool fS  = IsFloor(grid, x,     y - 1);
-            bool fE  = IsFloor(grid, x + 1, y    );
-            bool fW  = IsFloor(grid, x - 1, y    );
+            int fx = area.x;
+            int fy = area.y;
+            int fw = area.width;
+            int fh = area.height;
 
-            bool wN  = IsWall(grid, x,     y + 1);
-            bool wS  = IsWall(grid, x,     y - 1);
-            bool wE  = IsWall(grid, x + 1, y    );
-            bool wW  = IsWall(grid, x - 1, y    );
-
-            bool fS2 = IsFloor(grid, x, y - 2);  // пол в 2х клетках южнее
-            bool fN2 = IsFloor(grid, x, y + 2);  // пол в 2х клетках севернее
-
-            var pos = new Vector3Int(x, y, 0);
-
-            // ══════════════════════════════════════════════════════════════════
-            // ТИП 1 — СТРОКА 4: лицевая стена низ (пол на y-1)
-            // ══════════════════════════════════════════════════════════════════
-            if (fS && !fN)
-            {
-                if (!wW && wE)
-                {
-                    wall.SetTile(pos, ts.t1_FaceLeft_Bot);
-                    return;
-                }
-                if (wW && !wE)
-                {
-                    wall.SetTile(pos, ts.t1_FaceRight_Bot);
-                    return;
-                }
-                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallFace_Bot, x, y));
-                return;
-            }
-
-            // ══════════════════════════════════════════════════════════════════
-            // ТИП 1 — СТРОКА 3: лицевая стена верх (пол на y-2)
-            // ══════════════════════════════════════════════════════════════════
-            if (!fS && !fN && fS2 && wS)
-            {
-                if (!wW && wE)
-                {
-                    wall.SetTile(pos, ts.t1_FaceLeft_Top);
-                    return;
-                }
-                if (wW && !wE)
-                {
-                    wall.SetTile(pos, ts.t1_FaceRight_Top);
-                    return;
-                }
-                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallFace_Top, x, y));
-                return;
-            }
-
-            // ══════════════════════════════════════════════════════════════════
-            // ТИП 1 — СТРОКА 2: боковые стены коробки (ledge)
-            // ══════════════════════════════════════════════════════════════════
-            if (!fS && !fN && !fE && !fW && wS && IsWall(grid, x, y - 1))
-            {
-                if (!wW && wE)
-                {
-                    ledge.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallLeft, x, y));
-                    return;
-                }
-                if (wW && !wE)
-                {
-                    ledge.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallRight, x, y));
-                    return;
-                }
-            }
-
-            // ══════════════════════════════════════════════════════════════════
-            // ТИП 1 — СТРОКА 1: верх коробки / крыша (ledge)
-            // ══════════════════════════════════════════════════════════════════
-            if (!fS && !fN && !fE && !fW && wS && IsWall(grid, x, y - 1) && IsWall(grid, x, y - 2))
-            {
-                if (!wW && wE)
-                {
-                    ledge.SetTile(pos, ts.t1_CornerTopLeft);
-                    return;
-                }
-                if (wW && !wE)
-                {
-                    ledge.SetTile(pos, ts.t1_CornerTopRight);
-                    return;
-                }
-                ledge.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallTop, x, y));
-                return;
-            }
-
-            // ══════════════════════════════════════════════════════════════════
-            // ТИП 2 — СТРОКА 1: верхний ряд изнутри (пол на y+1)
+            // ── Row 1 (y = fy+fh): верхний ряд стены — WALL клетки ────────────
             //
-            //   тайл1.1 = T2_CornerTopLeft   — нет стены слева  (!wW && wE)
-            //   тайл1.2 = T2_WallLeft_Top    — стена слева, но пол слева (fW)
-            //   тайл1.3 = WallFace_Top       — середина верхней стены
-            //   тайл1.4 = T2_WallRight_Top   — стена справа, но пол справа (fE)
-            //   тайл1.5 = T2_CornerTopRight  — нет стены справа (wW && !wE)
-            // ══════════════════════════════════════════════════════════════════
-            if (fN && !fS)
-            {
-                // тайл1.1 — верхний левый угол изнутри
-                if (!wW && wE)
-                {
-                    wall.SetTile(pos, ts.t2_CornerTopLeft);
-                    return;
-                }
-                // тайл1.5 — верхний правый угол изнутри (idx 7)
-                if (wW && !wE)
-                {
-                    wall.SetTile(pos, ts.t2_CornerTopRight);
-                    return;
-                }
-                // тайл1.2 — верх левой боковой (слева боковая стена, примыкает к углу)
-                if (wW && IsFloor(grid, x - 1, y + 1))
-                {
-                    wall.SetTile(pos, ts.t2_WallLeft_Top);
-                    return;
-                }
-                // тайл1.4 — верх правой боковой (справа боковая стена, примыкает к углу)
-                if (wE && IsFloor(grid, x + 1, y + 1))
-                {
-                    wall.SetTile(pos, ts.t2_WallRight_Top);
-                    return;
-                }
-                // тайл1.3 — верхняя стена середина (те же тайлы что и тип1 лицевая верх)
-                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallFace_Top, x, y));
-                return;
-            }
+            //  тайл1.1  тайл1.2   тайл1.3 ...   тайл1.4  тайл1.5
+            //  CornerTL WL_Top    Face_Top        WR_Top   CornerTR
+            //  x=fx-1   x=fx      x=fx+1..fw-2   x=fw-1   x=fw
 
-            // ══════════════════════════════════════════════════════════════════
-            // ТИП 2 — СТРОКА 4: нижний ряд изнутри (стена на y+1, пол на y+2)
+            int ty = fy + fh;
+            Claim(wall, painted, fx - 1,      ty, ts.t2_CornerTopLeft);
+            Claim(wall, painted, fx,           ty, ts.t2_WallLeft_Top);
+            for (int x = fx + 1; x <= fx + fw - 2; x++)
+                Claim(wall, painted, x,        ty, Pick(ts.t1_WallFace_Top, x, ty));
+            Claim(wall, painted, fx + fw - 1,  ty, ts.t2_WallRight_Top);
+            Claim(wall, painted, fx + fw,      ty, ts.t2_CornerTopRight);
+
+            // ── Row 2 (y = fy+fh-1): верхняя строка ПОЛА ─────────────────────
             //
-            //   тайл4.1 = T2_CornerBotLeft   — нет стены слева  (!wW && wE)
-            //   тайл4.2-4.4 = T2_WallBot     — середина нижней стены
-            //   тайл4.5 = T2_CornerBotRight  — нет стены справа (wW && !wE)
-            // ══════════════════════════════════════════════════════════════════
-            if (!fN && fN2 && wN)
-            {
-                // тайл4.1 — нижний левый угол изнутри
-                if (!wW && wE)
-                {
-                    wall.SetTile(pos, ts.t2_CornerBotLeft);
-                    return;
-                }
-                // тайл4.5 — нижний правый угол изнутри
-                if (wW && !wE)
-                {
-                    wall.SetTile(pos, ts.t2_CornerBotRight);
-                    return;
-                }
-                // тайл4.2-4.4 — нижняя стена середина (те же тайлы что и тип1 лицевая низ)
-                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t1_WallFace_Bot, x, y));
-                return;
-            }
-
-            // ══════════════════════════════════════════════════════════════════
-            // ТИП 2 — СТРОКИ 2-3: боковые стены изнутри
+            //  WALL-клетки по бокам:   тайл2.1 (SideL)      тайл2.5 (SideR)
+            //  FLOOR-клетки в центре:  тайл2.2  тайл2.3...  тайл2.4
+            //                          WL_Bot   Face_Bot     WR_Bot
             //
-            //   ВНИМАНИЕ: для тип2 направление ОБРАТНОЕ относительно тип1!
-            //   пол слева  (fW) → игрок видит правую стену → t2_SideRight (44,45,46,8)
-            //   пол справа (fE) → игрок видит левую стену  → t2_SideLeft  (47,48,49,9)
+            // Тайлы 2.2-2.4 рисуются поверх пола на wallTilemap — это нормально.
+
+            int r2y = fy + fh - 1;
+            Claim(wall, painted, fx - 1,     r2y, Pick(ts.t2_SideLeft,  fx - 1, r2y));
+            Set  (wall,          fx,          r2y, ts.t2_WallLeft_Bot);        // floor
+            for (int x = fx + 1; x <= fx + fw - 2; x++)
+                Set(wall,        x,           r2y, Pick(ts.t1_WallFace_Bot, x, r2y)); // floor
+            Set  (wall,          fx + fw - 1, r2y, ts.t2_WallRight_Bot);      // floor
+            Claim(wall, painted, fx + fw,    r2y, Pick(ts.t2_SideRight, fx + fw, r2y));
+
+            // ── Rows 3+ (y = fy .. fy+fh-2): боковые стены — WALL клетки ─────
             //
-            //   Строка 2 отличается от строки 3 тайлами тайл2.2 и тайл2.4:
-            //   тайл2.2 = T2_WallLeft_Bot  (idx 11) — если снизу стена (wS) типа 4
-            //   тайл2.4 = T2_WallRight_Bot (idx 13) — если снизу стена (wS) типа 4
-            // ══════════════════════════════════════════════════════════════════
+            //  тайл3.1 SideL     [пол пол пол]     тайл3.5 SideR
 
-            // Боковая стена тип2 — пол слева (fW)
-            if (fW && !fE && !fN && !fS)
+            for (int y = fy; y <= fy + fh - 2; y++)
             {
-                // тайл2.2 — низ левой боковой (примыкает к нижней стене снизу)
-                // Условие: снизу стена, и за два шага вниз пол (это строка 4 нижней стены)
-                if (wS && IsFloor(grid, x, y - 2))
-                {
-                    wall.SetTile(pos, ts.t2_WallLeft_Bot);
-                    return;
-                }
-                // тайл3.1 / тайл2.1 — обычная боковая правая стена
-                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t2_SideRight, x, y));
-                return;
+                Claim(wall, painted, fx - 1,  y, Pick(ts.t2_SideLeft,  fx - 1, y));
+                Claim(wall, painted, fx + fw,  y, Pick(ts.t2_SideRight, fx + fw, y));
             }
 
-            // Боковая стена тип2 — пол справа (fE)
-            if (fE && !fW && !fN && !fS)
-            {
-                // тайл2.4 — низ правой боковой (примыкает к нижней стене снизу)
-                if (wS && IsFloor(grid, x, y - 2))
-                {
-                    wall.SetTile(pos, ts.t2_WallRight_Bot);
-                    return;
-                }
-                // тайл3.5 / тайл2.5 — обычная боковая левая стена
-                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.t2_SideLeft, x, y));
-                return;
-            }
+            // ── Row 4 (y = fy-1): нижний ряд стены — WALL клетки ─────────────
+            //
+            //  тайл4.1     тайл4.2-4.4           тайл4.5
+            //  CornerBL    WallBot...             CornerBR
+            //  x=fx-1      x=fx..fx+fw-1          x=fx+fw
 
-            // ══════════════════════════════════════════════════════════════════
-            // КОРИДОРЫ — боковые стены (пол с одной стороны, есть пол сверху или снизу)
-            // ══════════════════════════════════════════════════════════════════
-            if (fE && !fW)
-            {
-                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.sideWall_R, x, y));
-                return;
-            }
-            if (fW && !fE)
-            {
-                wall.SetTile(pos, DungeonWallTileSet.Pick(ts.sideWall_L, x, y));
-                return;
-            }
+            int by = fy - 1;
+            Claim(wall, painted, fx - 1,     by, ts.t2_CornerBotLeft);
+            for (int x = fx; x <= fx + fw - 1; x++)
+                Claim(wall, painted, x,      by, Pick(ts.t2_WallBot, x, by));
+            Claim(wall, painted, fx + fw,    by, ts.t2_CornerBotRight);
         }
 
-        // ── Хелперы ──────────────────────────────────────────────────────────
+        // ── Коридорные wall-клетки ─────────────────────────────────────────────
 
-        private static bool IsFloor(DungeonGrid grid, int x, int y) =>
-            grid.IsInBounds(x, y) && grid[x, y] == TileType.Floor;
+        static void PaintCorridorWall(DungeonGrid grid, DungeonWallTileSet ts,
+            Tilemap wall, int x, int y)
+        {
+            bool fN = IsFloor(grid, x, y + 1);
+            bool fS = IsFloor(grid, x, y - 1);
+            bool fE = IsFloor(grid, x + 1, y);
+            bool fW = IsFloor(grid, x - 1, y);
 
-        private static bool IsWall(DungeonGrid grid, int x, int y) =>
-            grid.IsInBounds(x, y) && grid[x, y] == TileType.Wall;
+            TileBase tile = null;
+
+            if      (fS && !fN) tile = Pick(ts.t1_WallFace_Top, x, y);
+            else if (fN && !fS) tile = Pick(ts.t2_WallBot,      x, y);
+            else if (fE && !fW) tile = Pick(ts.t2_SideLeft,     x, y);
+            else if (fW && !fE) tile = Pick(ts.t2_SideRight,    x, y);
+            else if (fS || fN)  tile = Pick(ts.t1_WallFace_Top, x, y);
+            else if (fE || fW)  tile = Pick(ts.t2_SideLeft,     x, y);
+
+            if (tile != null)
+                wall.SetTile(new Vector3Int(x, y, 0), tile);
+        }
+
+        // ── Утилиты ────────────────────────────────────────────────────────────
+
+        /// Рисует тайл и помечает клетку как нарисованную (для WALL-клеток).
+        static void Claim(Tilemap map, HashSet<Vector2Int> painted, int x, int y, TileBase tile)
+        {
+            Set(map, x, y, tile);
+            painted.Add(new Vector2Int(x, y));
+        }
+
+        static void Set(Tilemap map, int x, int y, TileBase tile)
+        {
+            if (tile != null)
+                map.SetTile(new Vector3Int(x, y, 0), tile);
+        }
+
+        static TileBase Pick(TileBase[] arr, int x, int y)
+            => DungeonWallTileSet.Pick(arr, x, y);
+
+        static bool IsFloor(DungeonGrid grid, int x, int y)
+            => grid.IsInBounds(x, y) && grid[x, y] == TileType.Floor;
     }
 }
