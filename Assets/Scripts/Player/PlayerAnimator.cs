@@ -1,115 +1,66 @@
 using UnityEngine;
 
-[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(Animator))]
 public class PlayerAnimator : MonoBehaviour
 {
-    [Header("Спрайты анимаций")]
-    [SerializeField] private Sprite[] walkSprites;
-    [SerializeField] private Sprite[] attackSprites;
-    [SerializeField] private Sprite[] deathSprites;
+    private static readonly int AnimIsMoving   = Animator.StringToHash("isMoving");
+    private static readonly int AnimIsAttacking = Animator.StringToHash("isAttacking");
+    private static readonly int AnimIsDead      = Animator.StringToHash("isDead");
+    private static readonly int AnimDirX        = Animator.StringToHash("dirX");
+    private static readonly int AnimDirY        = Animator.StringToHash("dirY");
 
-    [Header("Скорость анимаций (кадров/сек)")]
-    [SerializeField] private float walkFPS   = 9f;
-    [SerializeField] private float attackFPS = 10f;
-    [SerializeField] private float deathFPS  = 8f;
-
-    private SpriteRenderer sr;
-    private Rigidbody2D    rb;
-    private PlayerHealth   health;
-
-    private enum State { Idle, Walk, Attack, Death }
-    private State  state       = State.Idle;
-    private int    frameIndex  = 0;
-    private float  frameTimer  = 0f;
-    private bool   attackDone  = false;
+    private Animator     anim;
+    private Rigidbody2D  rb;
+    private PlayerHealth health;
 
     void Awake()
     {
-        sr     = GetComponent<SpriteRenderer>();
+        anim   = GetComponent<Animator>();
         rb     = GetComponent<Rigidbody2D>();
         health = GetComponent<PlayerHealth>();
 
         if (health != null)
-            health.OnDeath.AddListener(PlayDeath);
+            health.OnDeath.AddListener(OnDeath);
+
+        // Default facing: down
+        anim.SetFloat(AnimDirY, -1f);
     }
 
     void Update()
     {
-        if (state == State.Death) { TickAnimation(deathSprites, deathFPS, loop: false); return; }
+        if (anim.GetBool(AnimIsDead)) return;
 
-        Vector2 vel = rb != null ? rb.linearVelocity : Vector2.zero;
-        bool moving = vel.sqrMagnitude > 0.01f;
+        Vector2 vel   = rb != null ? rb.linearVelocity : Vector2.zero;
+        bool    moving = vel.sqrMagnitude > 0.01f;
 
-        // Зеркалим спрайт по горизонтали
-        if (Mathf.Abs(vel.x) > 0.01f)
-            sr.flipX = vel.x < 0f;
+        anim.SetBool(AnimIsMoving, moving);
 
-        if (state == State.Attack)
-        {
-            TickAnimation(attackSprites, attackFPS, loop: false);
-            if (attackDone) SetState(moving ? State.Walk : State.Idle);
-            return;
-        }
-
-        State next = moving ? State.Walk : State.Idle;
-        if (next != state) SetState(next);
-
-        if (state == State.Walk)
-            TickAnimation(walkSprites, walkFPS, loop: true);
-        else
-            ShowIdleFrame();
+        if (moving)
+            SetDirection(vel);
     }
 
-    // Вызывай извне (из скрипта атаки) для запуска анимации атаки
     public void TriggerAttack()
     {
-        if (state == State.Death) return;
-        SetState(State.Attack);
+        if (anim.GetBool(AnimIsDead)) return;
+        anim.SetTrigger(AnimIsAttacking);
     }
 
-    public void PlayDeath() => SetState(State.Death);
-
-    // ──────────────────────────────────────────────
-
-    private void SetState(State next)
+    private void OnDeath()
     {
-        state      = next;
-        frameIndex = 0;
-        frameTimer = 0f;
-        attackDone = false;
+        anim.SetTrigger(AnimIsDead);
     }
 
-    private void TickAnimation(Sprite[] sprites, float fps, bool loop)
+    private void SetDirection(Vector2 dir)
     {
-        if (sprites == null || sprites.Length == 0) return;
-
-        frameTimer += Time.deltaTime;
-        float frameDuration = 1f / fps;
-
-        while (frameTimer >= frameDuration)
+        if (Mathf.Abs(dir.x) >= Mathf.Abs(dir.y))
         {
-            frameTimer -= frameDuration;
-            frameIndex++;
-
-            if (frameIndex >= sprites.Length)
-            {
-                if (loop)
-                    frameIndex = 0;
-                else
-                {
-                    frameIndex = sprites.Length - 1;
-                    attackDone = true;
-                    break;
-                }
-            }
+            anim.SetFloat(AnimDirX, dir.x > 0f ? 1f : -1f);
+            anim.SetFloat(AnimDirY, 0f);
         }
-
-        sr.sprite = sprites[frameIndex];
-    }
-
-    private void ShowIdleFrame()
-    {
-        if (walkSprites != null && walkSprites.Length > 0)
-            sr.sprite = walkSprites[0];
+        else
+        {
+            anim.SetFloat(AnimDirX, 0f);
+            anim.SetFloat(AnimDirY, dir.y > 0f ? 1f : -1f);
+        }
     }
 }

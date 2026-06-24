@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 28.48229, y: 25.84033, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -178,8 +178,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 0.31, y: 0.48}
+  m_Offset: {x: 0, y: -0.084498405}
+  m_Size: {x: 0.31, y: 0.5103525}
   m_Direction: 0
 --- !u!114 &2743227915127342954
 MonoBehaviour:
@@ -197,6 +197,9 @@ MonoBehaviour:
   attackDamage: 5
   attackRange: 0.8
   attackCooldown: 1.2
+  OnHpChanged:
+    m_PersistentCalls:
+      m_Calls: []
   moveSpeed: 2.5
   detectionRange: 7
   pathRefreshRate: 0.4

@@ -6,12 +6,14 @@ public class PlayerController : MonoBehaviour
     [Header("Настройки движения")]
     [SerializeField] private float moveSpeed = 5f;
 
-    private Rigidbody2D rb; // В C# для Unity лучше использовать обычный Rigidbody2D (без ?)
-    private Vector2 moveInput;
+    private Rigidbody2D    rb;
+    private Vector2        moveInput;
+    private PlayerAnimator playerAnimator;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        rb             = GetComponent<Rigidbody2D>();
+        playerAnimator = GetComponent<PlayerAnimator>();
     }
 
     void Update()
@@ -47,6 +49,9 @@ public class PlayerController : MonoBehaviour
 
         // Соединяем в один вектор и нормализуем (чтобы не было ускорения по диагонали)
         moveInput = new Vector2(moveX, moveY).normalized;
+
+        if (keyboard.eKey.wasPressedThisFrame)
+            playerAnimator?.TriggerAttack();
     }
 
     void FixedUpdate()
