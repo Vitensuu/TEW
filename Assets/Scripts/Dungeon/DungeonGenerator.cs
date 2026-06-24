@@ -72,6 +72,10 @@ namespace Dungeon
         public Vector3 StartWorldPosition  { get; private set; }
         public Vector3 ExitWorldPosition   { get; private set; }
 
+        public DungeonGrid GetGrid()  => _grid;
+        public IReadOnlyList<RoomInfo> GetRooms() => _rooms;
+        public Tilemap FloorTilemap   => floorTilemap;
+
         // ── Unity ───────────────────────────────────────────────────────────
         private void Start()
         {
@@ -98,7 +102,9 @@ namespace Dungeon
 
             _grid = new DungeonGrid(dungeonWidth, dungeonHeight);
 
-            var root = new BSPNode(new RectInt(0, 0, dungeonWidth, dungeonHeight));
+            // Отступ 3 тайла от края — место для стен по периметру
+            const int border = 3;
+            var root = new BSPNode(new RectInt(border, border, dungeonWidth - border * 2, dungeonHeight - border * 2));
             root.Split(minLeafSize, _rng);
 
             BuildRoomsAndCorridors(root);
@@ -106,6 +112,7 @@ namespace Dungeon
 
             PaintTilemap();
             PlaceStartAndExit();
+            GetComponent<RoomPopulator>()?.Populate();
         }
 
         public void GenerateNextFloor()
@@ -167,7 +174,7 @@ namespace Dungeon
             // Стены
             if (wallTileSet != null)
             {
-                DungeonWallPainter.Paint(_grid, wallTileSet, wallTilemap, ledgeTilemap);
+                DungeonWallPainter.Paint(_grid, wallTileSet, wallTilemap, ledgeTilemap, _rooms);
             }
             else
             {

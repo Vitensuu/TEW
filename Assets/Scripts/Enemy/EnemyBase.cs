@@ -1,0 +1,145 @@
+using UnityEngine;
+using UnityEngine.Events;
+
+namespace Enemy
+{
+    /// <summary>
+    /// Базовый класс для всех врагов.
+    /// Хранит HP, принимает урон, управляет анимацией и смертью.
+    ///
+    /// Animator Controller должен иметь параметры:
+    ///   isMoving  (Bool)    — враг движется
+    ///   isAttacking (Trigger) — начало атаки
+    ///   isDead    (Trigger) — смерть
+    /// </summary>
+    [RequireComponent(typeof(Rigidbody2D))]
+    [RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(SpriteRenderer))]
+    public class EnemyBase : MonoBehaviour
+    {
+        [Header("Характеристики")]
+        [SerializeField] protected float maxHp      = 30f;
+        [SerializeField] protected float attackDamage = 5f;
+        [SerializeField] protected float attackRange  = 0.8f;
+        [SerializeField] protected float attackCooldown = 1.2f;
+
+        // Animator параметры
+        static readonly int AnimIsMoving    = Animator.StringToHash("isMoving");
+        static readonly int AnimIsAttacking = Animator.StringToHash("isAttacking");
+        static readonly int AnimIsDead      = Animator.StringToHash("isDead");
+        protected static readonly int AnimDirX = Animator.StringToHash("dirX");
+        protected static readonly int AnimDirY = Animator.StringToHash("dirY");
+
+        public UnityEvent<float> OnHpChanged; // 0..1 normalized
+
+        protected float          Hp;
+        protected bool           IsDead;
+        protected float          AttackTimer;
+
+        protected Rigidbody2D    Rb;
+        protected Animator       Anim;
+        protected SpriteRenderer Sr;
+
+        protected virtual void Awake()
+        {
+            Rb   = GetComponent<Rigidbody2D>();
+            Anim = GetComponent<Animator>();
+            Sr   = GetComponent<SpriteRenderer>();
+
+            Rb.gravityScale = 0f;
+            Rb.constraints  = RigidbodyConstraints2D.FreezeRotation;
+
+            Hp = maxHp;
+        }
+
+        protected virtual void Update()
+        {
+            if (IsDead) return;
+            if (AttackTimer > 0f) AttackTimer -= Time.deltaTime;
+        }
+
+        // ── Урон / смерть ────────────────────────────────────────────────────
+
+        public virtual void TakeDamage(float amount)
+        {
+            if (IsDead) return;
+            Hp = Mathf.Max(0f, Hp - amount);
+            OnHpChanged?.Invoke(Hp / maxHp);
+            if (Hp <= 0f) Die();
+        }
+
+        protected virtual void Die()
+        {
+            IsDead = true;
+            Rb.linearVelocity = Vector2.zero;
+            Anim.SetTrigger(AnimIsDead);
+            // Физику отключаем чтобы труп не мешал
+            GetComponent<Collider2D>().enabled = false;
+            // Уничтожаем объект после анимации смерти (~1.5 сек)
+            Destroy(gameObject, 1.5f);
+        }
+
+        // ── Анимация движения ─────────────────────────────────────────────────
+
+        protected void SetMoving(Vector2 velocity)
+        {
+            bool moving = velocity.sqrMagnitude > 0.01f;
+            Anim.SetBool(AnimIsMoving, moving);
+
+            if (moving)
+                SetDirection(velocity);
+        }
+
+        protected void SetDirection(Vector2 dir)
+        {
+            // Определяем доминирующую ось для 4-направленной анимации
+            if (Mathf.Abs(dir.x) >= Mathf.Abs(dir.y))
+            {
+                Anim.SetFloat(AnimDirX, dir.x > 0f ? 1f : -1f);
+                Anim.SetFloat(AnimDirY, 0f);
+            }
+            else
+            {
+                Anim.SetFloat(AnimDirX, 0f);
+                Anim.SetFloat(AnimDirY, dir.y > 0f ? 1f : -1f);
+            }
+        }
+
+        // ── Атака ─────────────────────────────────────────────────────────────
+
+        protected bool CanAttack() => !IsDead && AttackTimer <= 0f;
+
+        protected virtual void PerformAttack(Transform target)
+        {
+            if (!CanAttack()) return;
+            AttackTimer = attackCooldown;
+            Anim.SetTrigger(AnimIsAttacking);
+
+            // Урон наносится через Animation Event "OnAttackHit" (настроить в клипе атаки)
+            // или напрямую, если нет анимации:
+            ApplyAttackDamage(target);
+        }
+
+        // Вызывается как Animation Event из клипа атаки
+        protected virtual void OnAttackHit()
+        {
+            // Переопределяется в наследниках если нужна задержка через Animation Event
+        }
+
+        protected void ApplyAttackDamage(Transform target)
+        {
+            if (target == null) return;
+            float dist = Vector2.Distance(transform.position, target.position);
+            if (dist <= attackRange)
+                target.GetComponent<PlayerHealth>()?.TakeDamage(attackDamage);
+        }
+
+        // ── Публичные свойства ─────────────────────────────────────────────────
+
+        public float MaxHp        => maxHp;
+        public float CurrentHp    => Hp;
+        public bool  Dead         => IsDead;
+        public float AttackDmg    => attackDamage;
+        public float AttackRangeVal => attackRange;
+    }
+}
