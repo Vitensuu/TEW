@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Dungeon;
+using Dungeon.Procedural;
 
 namespace Enemy
 {
@@ -25,6 +26,7 @@ namespace Enemy
 
         State                _state;
         Transform            _player;
+        DungeonGenerator     _gen;
         DungeonGrid          _grid;
         List<Vector2Int>     _path    = new List<Vector2Int>();
         int                  _pathIdx;
@@ -47,8 +49,8 @@ namespace Enemy
         {
             // Ждём один кадр — DungeonGenerator точно успеет сгенерировать
             yield return null;
-            var gen = FindFirstObjectByType<DungeonGenerator>();
-            if (gen != null) _grid = gen.GetGrid();
+            _gen = FindFirstObjectByType<DungeonGenerator>();
+            if (_gen != null) _grid = _gen.GetGrid();
         }
 
         protected override void Update()
@@ -137,12 +139,16 @@ namespace Enemy
 
         // ── Вспомогательное ───────────────────────────────────────────────────
 
+        // Конвертация через генератор — он знает смещение сетки (_gridOrigin)
         Vector2Int WorldToCell(Vector3 world)
-            => new Vector2Int(Mathf.FloorToInt(world.x), Mathf.FloorToInt(world.y));
+            => _gen != null
+                ? _gen.WorldToCell(world)
+                : new Vector2Int(Mathf.FloorToInt(world.x), Mathf.FloorToInt(world.y));
 
-        // Центр клетки в мировых координатах
         Vector3 CellToWorld(Vector2Int cell)
-            => new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0f);
+            => _gen != null
+                ? _gen.CellToWorldCenter(cell)
+                : new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0f);
 
         void OnDrawGizmosSelected()
         {

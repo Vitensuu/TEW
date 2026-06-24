@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b70eebde4af6d425099e30944e0b39e1, type: 3}
+  m_Name: DungeonTileSet
+  m_EditorClassIdentifier: Assembly-CSharp::Dungeon.Procedural.DungeonTileSet
+  floorTiles:
+  - {fileID: 11400000, guid: bded2fc425ca84e6a8e461d9e27a73cb, type: 2}
+  - {fileID: 11400000, guid: 73e0934756a0e4c54933cc82be709709, type: 2}
+  - {fileID: 11400000, guid: c0ac32b56ca9645b896f6208f24a760c, type: 2}
+  - {fileID: 11400000, guid: 937d4b3de236740f5a7a473a92e28788, type: 2}
+  - {fileID: 11400000, guid: 7ccd00d6e662541c8855f46d6b0fcd80, type: 2}
+  - {fileID: 11400000, guid: ed37582e7866446b884370034924c8ef, type: 2}
+  - {fileID: 11400000, guid: 86dfd145688474b75a448693a59a9da0, type: 2}
+  wallRuleTile: {fileID: 0}
+  fallbackWall: {fileID: 0}
+  topEdge:
+  - {fileID: 11400000, guid: 19325f6f580e24f3ab9d0ea68ee701d2, type: 2}
+  - {fileID: 11400000, guid: 2173590e374454853a8ef6233686de52, type: 2}
+  - {fileID: 11400000, guid: 3b2f5c588321e4f9aa1ba7bdcdbf564c, type: 2}
+  - {fileID: 11400000, guid: 7ef7b38c224434ad89e236220dfee583, type: 2}
+  - {fileID: 11400000, guid: d8012f375675f49dcb7ba51ccb4737b5, type: 2}
+  - {fileID: 11400000, guid: 95da3b482a35c415ca953587c79b7024, type: 2}
+  bottomEdge:
+  - {fileID: 11400000, guid: 59cc18270b1694026a9732fc53d94976, type: 2}
+  - {fileID: 11400000, guid: 0042e1138728c44b28bd92f517f5d77b, type: 2}
+  - {fileID: 11400000, guid: a1014c8a328c34114b7e6b1ca5dc5a94, type: 2}
+  - {fileID: 11400000, guid: 5488ee0c6fe6a4f19acb3f84dcf3ab69, type: 2}
+  - {fileID: 11400000, guid: 526a58181c5c8462f8996a3d4e4573df, type: 2}
+  leftEdge:
+  - {fileID: 11400000, guid: dbee7b97561474250a2879bc96658eae, type: 2}
+  - {fileID: 11400000, guid: 3ff496cca82b64eea957473f6e66af22, type: 2}
+  - {fileID: 11400000, guid: 9bd77b18c92a7462e94e1641f6b0b158, type: 2}
+  - {fileID: 11400000, guid: 0846c93f966cd4459b0eba93783f6d7d, type: 2}
+  rightEdge:
+  - {fileID: 11400000, guid: 96fcb702f193347d694be0afd7bb3fa9, type: 2}
+  - {fileID: 11400000, guid: f2ba58eef49524ecb9fad3c1e9edc318, type: 2}
+  - {fileID: 11400000, guid: 7338632759dd14faeb1e9dfcbc803a73, type: 2}
+  - {fileID: 11400000, guid: a1673ed41214d45f68f9236d8f058c06, type: 2}
+  topLeft:
+  - {fileID: 11400000, guid: 2c7f457787ef6454588ae6e7aeada680, type: 2}
+  - {fileID: 11400000, guid: 38eb8e2569af34656a1f75b4726c0442, type: 2}
+  topRight:
+  - {fileID: 11400000, guid: bcda480e85bf34fd1b45325a95f6bd4c, type: 2}
+  - {fileID: 11400000, guid: 33e007aa675aa444eb03a4fc032dfb50, type: 2}
+  bottomLeft:
+  - {fileID: 11400000, guid: 7c18df740c2f14d1fb7f2a7ac8936810, type: 2}
+  - {fileID: 11400000, guid: 7d2af52dd79ed407c9a9afd77d2b5379, type: 2}
+  bottomRight:
+  - {fileID: 11400000, guid: 2b662045d94084862961ba0a3b8deadb, type: 2}
+  - {fileID: 11400000, guid: 1120c5ffb22584425b418a6150bacd42, type: 2}
+  innerTopLeft:
+  - {fileID: 11400000, guid: a4ce2fb78168d45918ba87c4eb82293d, type: 2}
+  innerTopRight:
+  - {fileID: 11400000, guid: dfb36724f3b474371a6e0544e75d8cc9, type: 2}
+  innerBottomLeft:
+  - {fileID: 11400000, guid: 37f8914a1aede4224aa7e698f4ad288d, type: 2}
+  innerBottomRight:
+  - {fileID: 11400000, guid: a79cf45719fe143cf8c89a87cc411a14, type: 2}
