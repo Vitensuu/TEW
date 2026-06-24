@@ -1,4 +1,5 @@
 using UnityEngine;
+using Dungeon.Procedural;
 
 namespace Dungeon
 {

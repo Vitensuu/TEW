@@ -595,7 +595,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 128
-        y: 416
+        y: 415
         width: 32
         height: 32
       alignment: 0
@@ -908,7 +908,7 @@ TextureImporter:
       name: TX Tileset Wall_23
       rect:
         serializedVersion: 2
-        x: 32
+        x: 33
         y: 352
         width: 32
         height: 32
@@ -1026,9 +1026,9 @@ TextureImporter:
       name: TX Tileset Wall_28
       rect:
         serializedVersion: 2
-        x: 32
+        x: 33
         y: 288
-        width: 32
+        width: 33
         height: 32
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -1070,7 +1070,7 @@ TextureImporter:
       name: TX Tileset Wall_30
       rect:
         serializedVersion: 2
-        x: 96
+        x: 97
         y: 288
         width: 32
         height: 32
@@ -1180,7 +1180,7 @@ TextureImporter:
       name: TX Tileset Wall_35
       rect:
         serializedVersion: 2
-        x: 128
+        x: 129
         y: 256
         width: 32
         height: 32
@@ -1796,6 +1796,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: TX Tileset Wall_61
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 341
+        width: 121
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 76c6a35db7c7446c481e04e096b61da8
+      internalID: -1364770531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -1868,6 +1890,7 @@ TextureImporter:
       TX Tileset Wall_59: 21300118
       TX Tileset Wall_6: 21300012
       TX Tileset Wall_60: 21300120
+      TX Tileset Wall_61: -1364770531
       TX Tileset Wall_7: 21300014
       TX Tileset Wall_8: 21300016
       TX Tileset Wall_9: 21300018
