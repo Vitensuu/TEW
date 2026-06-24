@@ -24,9 +24,10 @@ namespace Enemy
         [SerializeField] protected float attackCooldown = 1.2f;
 
         // Animator параметры
-        static readonly int AnimIsMoving    = Animator.StringToHash("isMoving");
-        static readonly int AnimIsAttacking = Animator.StringToHash("isAttacking");
-        static readonly int AnimIsDead      = Animator.StringToHash("isDead");
+        static readonly int AnimIsMoving      = Animator.StringToHash("isMoving");
+        static readonly int AnimIsAttacking   = Animator.StringToHash("isAttacking"); // Bool
+        static readonly int AnimAttackTrigger = Animator.StringToHash("attackTrigger"); // Trigger
+        static readonly int AnimIsDead        = Animator.StringToHash("isDead");
         protected static readonly int AnimDirX = Animator.StringToHash("dirX");
         protected static readonly int AnimDirY = Animator.StringToHash("dirY");
 
@@ -113,11 +114,29 @@ namespace Enemy
         {
             if (!CanAttack()) return;
             AttackTimer = attackCooldown;
-            Anim.SetTrigger(AnimIsAttacking);
 
-            // Урон наносится через Animation Event "OnAttackHit" (настроить в клипе атаки)
-            // или напрямую, если нет анимации:
+            // Включаем Bool isAttacking → анимация атаки
+            Anim.SetBool(AnimIsAttacking, true);
+            // Trigger для совместимости если используется
+            if (HasAnimParam(AnimAttackTrigger)) Anim.SetTrigger(AnimAttackTrigger);
+
             ApplyAttackDamage(target);
+
+            // Сбрасываем isAttacking после кулдауна → анимация вернётся в Idle/Walk
+            StartCoroutine(ResetAttackAnim());
+        }
+
+        System.Collections.IEnumerator ResetAttackAnim()
+        {
+            yield return new WaitForSeconds(attackCooldown * 0.8f);
+            if (!IsDead) Anim.SetBool(AnimIsAttacking, false);
+        }
+
+        bool HasAnimParam(int hash)
+        {
+            foreach (var p in Anim.parameters)
+                if (p.nameHash == hash) return true;
+            return false;
         }
 
         // Вызывается как Animation Event из клипа атаки
@@ -130,8 +149,16 @@ namespace Enemy
         {
             if (target == null) return;
             float dist = Vector2.Distance(transform.position, target.position);
-            if (dist <= attackRange)
-                target.GetComponent<PlayerHealth>()?.TakeDamage(attackDamage);
+            if (dist > attackRange) return;
+
+            var ph = target.GetComponent<PlayerHealth>();
+            if (ph == null)
+            {
+                Debug.LogWarning("[EnemyBase] PlayerHealth не найден на " + target.name +
+                    " — добавь компонент PlayerHealth на объект игрока!");
+                return;
+            }
+            ph.TakeDamage(attackDamage);
         }
 
         // ── Публичные свойства ─────────────────────────────────────────────────

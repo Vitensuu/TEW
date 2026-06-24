@@ -43,6 +43,36 @@ public class PlayerAnimator : MonoBehaviour
     {
         if (anim.GetBool(AnimIsDead)) return;
         anim.SetTrigger(AnimIsAttacking);
+        StartCoroutine(ResetAttackAfterClip());
+    }
+
+    System.Collections.IEnumerator ResetAttackAfterClip()
+    {
+        // Ждём один кадр чтобы Animator переключился на клип атаки
+        yield return null;
+        yield return null;
+
+        // Ждём пока клип атаки не закончится (normalizedTime >= 1)
+        while (true)
+        {
+            var info = anim.GetCurrentAnimatorStateInfo(0);
+            // Если это клип атаки и он ещё не закончился — ждём
+            if (info.IsName("Attack_Down") || info.IsName("Attack_Up") ||
+                info.IsName("Attack_Left") || info.IsName("Attack_Right"))
+            {
+                if (info.normalizedTime >= 0.95f) break;
+            }
+            else
+            {
+                // Уже вышли из атаки сами
+                yield break;
+            }
+            yield return null;
+        }
+
+        // Сбрасываем триггер и возвращаем в Idle/Walk
+        anim.ResetTrigger(AnimIsAttacking);
+        anim.SetBool(AnimIsMoving, rb != null && rb.linearVelocity.sqrMagnitude > 0.01f);
     }
 
     private void OnDeath()
