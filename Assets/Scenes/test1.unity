@@ -12862,10 +12862,6 @@ MonoBehaviour:
   m_DetectChunkCullingBounds: 0
 --- !u!1839735485 &806245811
 Tilemap:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
 =======
   m_GameObject: {fileID: 527610684}
   m_Enabled: 1
