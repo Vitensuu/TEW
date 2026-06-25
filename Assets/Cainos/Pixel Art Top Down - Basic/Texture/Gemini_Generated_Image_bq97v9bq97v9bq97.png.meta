@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 97e847c76a7bc4756945f55d0b2ba8b2
+guid: 5acc2607fccc931439ac958df3d98f72
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3023850045430360540
-    second: Unknown_0
+      213: -8793882247161344726
+    second: Gemini_Generated_Image_bq97v9bq97v9bq97_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -96,30 +96,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Unknown_0
+      name: Gemini_Generated_Image_bq97v9bq97v9bq97_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 254
-        height: 148
+        width: 1376
+        height: 768
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 426131c97602906d0800000000000000
-      internalID: -3023850045430360540
+      spriteID: a2d855d20bad5f580800000000000000
+      internalID: -8793882247161344726
       vertices: []
       indices: 
       edges: []
@@ -148,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Unknown_0: -3023850045430360540
+      Gemini_Generated_Image_bq97v9bq97v9bq97_0: -8793882247161344726
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
