@@ -5,15 +5,6 @@ using Dungeon.Procedural;
 
 namespace Enemy
 {
-    /// <summary>
-    /// AI врага: Idle → Chase → Attack.
-    /// Требует DungeonGenerator на сцене для получения DungeonGrid.
-    ///
-    /// Состояния:
-    ///   Idle    — стоит, пока игрок дальше detectionRange
-    ///   Chase   — идёт к игроку по A*-пути, пересчитывает путь каждые pathRefreshRate секунд
-    ///   Attack  — бьёт игрока когда он в attackRange
-    /// </summary>
     public class EnemyAI : EnemyBase
     {
         [Header("AI")]
