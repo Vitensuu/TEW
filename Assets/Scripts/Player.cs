@@ -9,11 +9,14 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D    rb;
     private Vector2        moveInput;
     private PlayerAnimator playerAnimator;
+    private Game.Player.PlayerStats stats; // ТЗ §5 — скорость из пересчитанных статов
 
     void Start()
     {
         rb             = GetComponent<Rigidbody2D>();
         playerAnimator = GetComponent<PlayerAnimator>();
+        stats          = GetComponent<Game.Player.PlayerStats>();
+        if (stats != null && stats.Speed > 0f) moveSpeed = stats.Speed;
     }
 
     void Update()

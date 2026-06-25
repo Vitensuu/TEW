@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Dungeon;
-using Dungeon.Procedural;
+using Game.Dungeon;
 
 namespace Enemy
 {
@@ -17,37 +16,37 @@ namespace Enemy
 
         State                _state;
         Transform            _player;
-        DungeonGenerator     _gen;
-        DungeonGrid          _grid;
         List<Vector2Int>     _path    = new List<Vector2Int>();
         int                  _pathIdx;
         float                _pathTimer;
+        Game.Combat.StatusEffectHandler _status;
 
         protected override void Awake()
         {
             base.Awake();
+            _status = GetComponent<Game.Combat.StatusEffectHandler>();
         }
 
         void Start()
         {
             var playerGO = GameObject.FindGameObjectWithTag("Player");
             if (playerGO != null) _player = playerGO.transform;
-
-            StartCoroutine(InitGridNextFrame());
         }
 
-        System.Collections.IEnumerator InitGridNextFrame()
-        {
-            // Ждём один кадр — DungeonGenerator точно успеет сгенерировать
-            yield return null;
-            _gen = FindFirstObjectByType<DungeonGenerator>();
-            if (_gen != null) _grid = _gen.GetGrid();
-        }
+        NavGrid Nav => RoomManager.Instance != null ? RoomManager.Instance.Nav : null;
 
         protected override void Update()
         {
             base.Update();
             if (IsDead || _player == null) return;
+
+            // Stun (ТЗ §4): полная остановка, не двигаемся и не атакуем.
+            if (_status != null && _status.IsStunned)
+            {
+                Rb.linearVelocity = Vector2.zero;
+                SetMoving(Vector2.zero);
+                return;
+            }
 
             float dist = Vector2.Distance(transform.position, _player.position);
 
@@ -88,13 +87,14 @@ namespace Enemy
 
         void RefreshPath()
         {
-            if (_grid == null || _player == null) return;
+            var nav = Nav;
+            if (nav == null || _player == null) return;
 
-            // Конвертируем world → grid cell
-            Vector2Int fromCell = WorldToCell(transform.position);
-            Vector2Int toCell   = WorldToCell(_player.position);
+            // Конвертируем world → grid cell (NavGrid строится из реальной геометрии комнат)
+            Vector2Int fromCell = nav.WorldToCell(transform.position);
+            Vector2Int toCell   = nav.WorldToCell(_player.position);
 
-            _path    = GridPathfinder.FindPath(_grid, fromCell, toCell);
+            _path    = GridPathfinder.FindPath(nav, fromCell, toCell);
             _pathIdx = 0;
         }
 
@@ -107,9 +107,10 @@ namespace Enemy
                 return;
             }
 
-            Vector3 target = CellToWorld(_path[_pathIdx]);
+            Vector3 target = Nav != null ? Nav.CellToWorldCenter(_path[_pathIdx]) : transform.position;
             Vector2 dir    = (target - transform.position).normalized;
-            Rb.linearVelocity = dir * moveSpeed;
+            float speedMul = _status != null ? _status.SpeedMultiplier : 1f; // Freeze (ТЗ §4)
+            Rb.linearVelocity = dir * moveSpeed * speedMul;
             SetMoving(dir);
 
             if (Vector2.Distance(transform.position, target) < waypointReachDist)
@@ -127,19 +128,6 @@ namespace Enemy
             SetDirection(toPlayer);
             PerformAttack(_player);
         }
-
-        // ── Вспомогательное ───────────────────────────────────────────────────
-
-        // Конвертация через генератор — он знает смещение сетки (_gridOrigin)
-        Vector2Int WorldToCell(Vector3 world)
-            => _gen != null
-                ? _gen.WorldToCell(world)
-                : new Vector2Int(Mathf.FloorToInt(world.x), Mathf.FloorToInt(world.y));
-
-        Vector3 CellToWorld(Vector2Int cell)
-            => _gen != null
-                ? _gen.CellToWorldCenter(cell)
-                : new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0f);
 
         void OnDrawGizmosSelected()
         {
