@@ -48,11 +48,9 @@ public class PlayerAnimator : MonoBehaviour
 
     System.Collections.IEnumerator ResetAttackAfterClip()
     {
-        // Ждём один кадр чтобы Animator переключился на клип атаки
         yield return null;
         yield return null;
 
-        // Ждём пока клип атаки не закончится (normalizedTime >= 1)
         while (true)
         {
             var info = anim.GetCurrentAnimatorStateInfo(0);
