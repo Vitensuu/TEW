@@ -1,11 +1,14 @@
 using UnityEngine;
 using UnityEngine.Events;
+using Game.Core;
+using Game.Data;
 
 namespace Enemy
 {
     /// <summary>
-    /// Базовый класс для всех врагов.
-    /// Хранит HP, принимает урон, управляет анимацией и смертью.
+    /// Базовый класс для всех врагов (ТЗ §5 — EnemyBase, Template Method).
+    /// Хранит HP, принимает урон (IDamageable), управляет анимацией и смертью,
+    /// при гибели начисляет золото/EXP и дропает лут (LootDropper), шлёт EventBus.
     ///
     /// Animator Controller должен иметь параметры:
     ///   isMoving  (Bool)    — враг движется
@@ -15,8 +18,11 @@ namespace Enemy
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Animator))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class EnemyBase : MonoBehaviour
+    public class EnemyBase : MonoBehaviour, IDamageable
     {
+        [Header("Данные (опционально — переопределяют поля ниже)")]
+        [SerializeField] protected EnemyData data;
+
         [Header("Характеристики")]
         [SerializeField] protected float maxHp      = 30f;
         [SerializeField] protected float attackDamage = 5f;
@@ -32,6 +38,10 @@ namespace Enemy
         protected static readonly int AnimDirY = Animator.StringToHash("dirY");
 
         public UnityEvent<float> OnHpChanged; // 0..1 normalized
+
+        // IDamageable: (current, max)
+        public event System.Action<float, float> OnHealthChanged;
+        public bool IsAlive => !IsDead;
 
         protected float          Hp;
         protected bool           IsDead;
@@ -50,8 +60,21 @@ namespace Enemy
             Rb.gravityScale = 0f;
             Rb.constraints  = RigidbodyConstraints2D.FreezeRotation;
 
+            ApplyData();
             Hp = maxHp;
         }
+
+        /// <summary>Подтянуть характеристики из EnemyData, если назначен.</summary>
+        protected virtual void ApplyData()
+        {
+            if (data == null) return;
+            maxHp          = data.maxHealth;
+            attackDamage   = data.damage;
+            attackRange    = data.attackRange;
+            attackCooldown = data.attackCooldown;
+        }
+
+        public EnemyData Data => data;
 
         protected virtual void Update()
         {
@@ -61,12 +84,25 @@ namespace Enemy
 
         // ── Урон / смерть ────────────────────────────────────────────────────
 
-        public virtual void TakeDamage(float amount)
+        // IDamageable
+        public virtual void TakeDamage(float amount, DamageType type = DamageType.Physical)
         {
             if (IsDead) return;
             Hp = Mathf.Max(0f, Hp - amount);
             OnHpChanged?.Invoke(Hp / maxHp);
+            OnHealthChanged?.Invoke(Hp, maxHp);
             if (Hp <= 0f) Die();
+        }
+
+        // Совместимость со старым кодом (одно-аргументный вызов).
+        public void TakeDamage(float amount) => TakeDamage(amount, DamageType.Physical);
+
+        public virtual void Heal(float amount)
+        {
+            if (IsDead) return;
+            Hp = Mathf.Min(maxHp, Hp + amount);
+            OnHpChanged?.Invoke(Hp / maxHp);
+            OnHealthChanged?.Invoke(Hp, maxHp);
         }
 
         protected virtual void Die()
@@ -76,8 +112,28 @@ namespace Enemy
             Anim.SetTrigger(AnimIsDead);
             // Физику отключаем чтобы труп не мешал
             GetComponent<Collider2D>().enabled = false;
+
+            GrantRewardsAndLoot();
+            EventBus.TriggerEnemyKilled(this);
+
             // Уничтожаем объект после анимации смерти (~1.5 сек)
             Destroy(gameObject, 1.5f);
+        }
+
+        /// <summary>Награды (золото/EXP) + дроп лута по таблице (ТЗ §4).</summary>
+        protected virtual void GrantRewardsAndLoot()
+        {
+            if (data != null)
+            {
+                var run = GameManager.Instance != null ? GameManager.Instance.Run : null;
+                if (run != null)
+                {
+                    run.gold += data.goldReward;
+                    run.enemiesKilled++;
+                    EventBus.TriggerGoldChanged(run.gold);
+                }
+                Game.Items.LootDropper.DropLoot(data.lootTable, transform.position);
+            }
         }
 
         // ── Анимация движения ─────────────────────────────────────────────────
