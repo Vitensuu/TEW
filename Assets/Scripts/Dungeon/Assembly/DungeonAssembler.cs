@@ -34,7 +34,11 @@ namespace Game.Dungeon
         [Header("Сид / игрок")]
         [SerializeField] bool useRandomSeed = true;
         [SerializeField] int seed = 12345;
+        [Tooltip("Игрок в сцене. Если пусто — будет создан из Player Prefab.")]
         [SerializeField] Transform player;
+        [Tooltip("Префаб игрока. Инстанцируется, если игрока нет в сцене " +
+                 "(например, игрок вынесен в префаб и удалён со сцены).")]
+        [SerializeField] GameObject playerPrefab;
 
         [Header("Запуск")]
         [SerializeField] bool assembleOnStart = true;
@@ -278,6 +282,9 @@ namespace Game.Dungeon
                 ? exitInst.ExitPoint.position
                 : (exitInst != null ? exitInst.transform.position : StartWorldPosition);
 
+            // Игрок мог быть вынесен в префаб и удалён со сцены — создаём его сами,
+            // иначе на карте никого нет.
+            EnsurePlayer();
             if (player != null)
             {
                 Transform altarSpawn = FindNamedSpawn("TX Props Altar");
@@ -332,6 +339,29 @@ namespace Game.Dungeon
             foreach (var r in _placed) if (r != null) Destroy(r.gameObject);
             _placed.Clear();
             if (_root != null) { Destroy(_root.gameObject); _root = null; }
+        }
+
+        /// <summary>
+        /// Гарантирует наличие игрока на сцене. Порядок: уже назначенный player →
+        /// существующий в сцене (PlayerRef/тег) → инстанс из playerPrefab.
+        /// </summary>
+        void EnsurePlayer()
+        {
+            if (player != null) return;
+
+            var existing = Game.Core.PlayerRef.Resolve();
+            if (existing != null) { player = existing.transform; return; }
+
+            if (playerPrefab != null)
+            {
+                var go = Instantiate(playerPrefab, StartWorldPosition, Quaternion.identity);
+                player = go.transform;
+            }
+            else
+            {
+                Debug.LogError("[DungeonAssembler] Игрок не найден в сцене и Player Prefab " +
+                               "не назначен — назначь Player Prefab в инспекторе ассемблера.");
+            }
         }
 
         /// <summary>Ищет дочерний объект с именем name во всех размещённых комнатах.</summary>

@@ -90,7 +90,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &823293597397167173
 GameObject:
   m_ObjectHideFlags: 0
@@ -181,7 +181,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &1203955138459270832
 GameObject:
   m_ObjectHideFlags: 0
@@ -272,7 +272,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &3304000873074211769
 GameObject:
   m_ObjectHideFlags: 0
@@ -358,9 +358,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Game.Dungeon.RoomInstance
   data: {fileID: 0}
   autoConfigure: 1
-  wallTilemapNameHint: Wall
   floorTilemapNameHint: Floor
   obstacleLayerName: Obstacle
+  doorGapWidth: 3
+  wallThickness: 0.5
   footprint: {x: 16, y: 12}
   boundsBox: {fileID: 0}
 --- !u!1 &3356123812641744850
@@ -373,6 +374,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7038640701423854018}
   - component: {fileID: 4690545667432289960}
+  - component: {fileID: 4275197839093071079}
   m_Layer: 0
   m_Name: TX Player S (3)
   m_TagString: Untagged
@@ -453,7 +455,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &4275197839093071079
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3356123812641744850}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.10860019}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.96875}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.21720038}
+  m_EdgeRadius: 0
 --- !u!1 &3586723594340591614
 GameObject:
   m_ObjectHideFlags: 0
@@ -544,7 +592,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &3761607081325092992
 GameObject:
   m_ObjectHideFlags: 0
@@ -635,7 +683,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &3854398667494646403
 GameObject:
   m_ObjectHideFlags: 0
@@ -726,7 +774,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &4134704048763736898
 GameObject:
   m_ObjectHideFlags: 0
@@ -737,6 +785,7 @@ GameObject:
   m_Component:
   - component: {fileID: 47902181192250088}
   - component: {fileID: 2298549064194322959}
+  - component: {fileID: 5380304866027004771}
   m_Layer: 0
   m_Name: TX Player S
   m_TagString: Untagged
@@ -817,7 +866,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &5380304866027004771
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4134704048763736898}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.13314293}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.96875}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.26628587}
+  m_EdgeRadius: 0
 --- !u!1 &4585245384387928626
 GameObject:
   m_ObjectHideFlags: 0
@@ -908,7 +1003,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &4829478896104793787
 GameObject:
   m_ObjectHideFlags: 0
@@ -919,6 +1014,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7722882388320378985}
   - component: {fileID: 4041872749407736798}
+  - component: {fileID: 9202449415713992233}
   m_Layer: 0
   m_Name: TX Player B (2)
   m_TagString: Untagged
@@ -999,7 +1095,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &9202449415713992233
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4829478896104793787}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.13099648}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.9375}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.26199296}
+  m_EdgeRadius: 0
 --- !u!1 &4972597564144450032
 GameObject:
   m_ObjectHideFlags: 0
@@ -1010,6 +1152,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9009001892496086947}
   - component: {fileID: 2009320451606999611}
+  - component: {fileID: 3033135055998308843}
   m_Layer: 0
   m_Name: TX Player B
   m_TagString: Untagged
@@ -1090,7 +1233,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &3033135055998308843
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4972597564144450032}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.12211258}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.9375}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.24422516}
+  m_EdgeRadius: 0
 --- !u!1 &5158374322031769973
 GameObject:
   m_ObjectHideFlags: 0
@@ -1101,6 +1290,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3804411009176304827}
   - component: {fileID: 808809296245759814}
+  - component: {fileID: 8237773891807643480}
   m_Layer: 0
   m_Name: TX Player S (1)
   m_TagString: Untagged
@@ -1181,7 +1371,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &8237773891807643480
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5158374322031769973}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.12033594}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.96875}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.24067187}
+  m_EdgeRadius: 0
 --- !u!1 &5242948254453403164
 GameObject:
   m_ObjectHideFlags: 0
@@ -1272,7 +1508,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &5535243429789602655
 GameObject:
   m_ObjectHideFlags: 0
@@ -1363,7 +1599,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &5615139241264262431
 GameObject:
   m_ObjectHideFlags: 0
@@ -1374,6 +1610,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4257052210694601649}
   - component: {fileID: 7107777690233486904}
+  - component: {fileID: 3693808535348321216}
   m_Layer: 0
   m_Name: TX Player B (1)
   m_TagString: Untagged
@@ -1454,7 +1691,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &3693808535348321216
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5615139241264262431}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.104496114}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.9375}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.20899223}
+  m_EdgeRadius: 0
 --- !u!1 &5975226316046307493
 GameObject:
   m_ObjectHideFlags: 0
@@ -1545,7 +1828,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &6247590608104311426
 GameObject:
   m_ObjectHideFlags: 0
@@ -1556,6 +1839,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6332045862040896694}
   - component: {fileID: 9052238702315015631}
+  - component: {fileID: 4497357046968083922}
   m_Layer: 0
   m_Name: TX Player F (1)
   m_TagString: Untagged
@@ -1636,7 +1920,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &4497357046968083922
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6247590608104311426}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.12558477}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.9375}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.25116953}
+  m_EdgeRadius: 0
 --- !u!1 &6720260530329793462
 GameObject:
   m_ObjectHideFlags: 0
@@ -1727,7 +2057,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &7115347777317539794
 GameObject:
   m_ObjectHideFlags: 0
@@ -1738,6 +2068,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1163983983169460521}
   - component: {fileID: 1548574206549538667}
+  - component: {fileID: 2228663058399454971}
   m_Layer: 0
   m_Name: TX Player S (4)
   m_TagString: Untagged
@@ -1818,7 +2149,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &2228663058399454971
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7115347777317539794}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.14147805}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.96875}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.2829561}
+  m_EdgeRadius: 0
 --- !u!1 &7279861405822508507
 GameObject:
   m_ObjectHideFlags: 0
@@ -1829,6 +2206,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9104965523704298713}
   - component: {fileID: 851718441156584268}
+  - component: {fileID: 738957568000779461}
   m_Layer: 0
   m_Name: TX Player F
   m_TagString: Untagged
@@ -1909,7 +2287,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &738957568000779461
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7279861405822508507}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.10809916}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.9375}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.21619833}
+  m_EdgeRadius: 0
 --- !u!1 &7424040695010883128
 GameObject:
   m_ObjectHideFlags: 0
@@ -2000,7 +2424,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!1 &7574742744873213078
 GameObject:
   m_ObjectHideFlags: 0
@@ -2011,6 +2435,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5722858884043439620}
   - component: {fileID: 2142332194509881034}
+  - component: {fileID: 249590694762157581}
   m_Layer: 0
   m_Name: TX Player F (2)
   m_TagString: Untagged
@@ -2091,7 +2516,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &249590694762157581
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7574742744873213078}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.11169383}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.9375}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.22338766}
+  m_EdgeRadius: 0
 --- !u!1 &7621138786246224332
 GameObject:
   m_ObjectHideFlags: 0
@@ -2103,6 +2574,9 @@ GameObject:
   - component: {fileID: 1486408135321282591}
   - component: {fileID: 1580205040448137572}
   - component: {fileID: 4522114203894944447}
+  - component: {fileID: 3305587728239298802}
+  - component: {fileID: 824571323881802537}
+  - component: {fileID: 4052138750477464398}
   m_Layer: 0
   m_Name: Wall 1
   m_TagString: Untagged
@@ -2843,6 +3317,190 @@ TilemapRenderer:
   m_SortOrder: 0
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
+--- !u!50 &3305587728239298802
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7621138786246224332}
+  m_BodyType: 2
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!19719996 &824571323881802537
+TilemapCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7621138786246224332}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 1
+  m_CompositeOperation: 1
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_MaximumTileChangeCount: 1000
+  m_ExtrusionFactor: 0
+  m_UseDelaunayMesh: 0
+--- !u!66 &4052138750477464398
+CompositeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7621138786246224332}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_GeometryType: 0
+  m_GenerationType: 0
+  m_EdgeRadius: 0
+  m_ColliderPaths:
+  - m_Collider: {fileID: 824571323881802537}
+    m_ColliderPaths:
+    - - X: -50000000
+        Y: 500000000
+      - X: 0
+        Y: 500000000
+      - X: 0
+        Y: 520000000
+      - X: -52500000
+        Y: 520000000
+      - X: -52500000
+        Y: 460000000
+      - X: -50000000
+        Y: 460000000
+    - - X: 72500000
+        Y: 520000000
+      - X: 20000000
+        Y: 520000000
+      - X: 20000000
+        Y: 500000000
+      - X: 70000000
+        Y: 500000000
+      - X: 70000000
+        Y: 460000000
+      - X: 72500000
+        Y: 460000000
+    - - X: 0
+        Y: 400000000
+      - X: -50000000
+        Y: 400000000
+      - X: -50000000
+        Y: 440000000
+      - X: -52500000
+        Y: 440000000
+      - X: -52500000
+        Y: 397500000
+      - X: 0
+        Y: 397500000
+    - - X: 72500000
+        Y: 440000000
+      - X: 70000000
+        Y: 440000000
+      - X: 70000000
+        Y: 400000000
+      - X: 20000000
+        Y: 400000000
+      - X: 20000000
+        Y: 397500000
+      - X: 72500000
+        Y: 397500000
+  m_CompositePaths:
+    m_Paths:
+    - - {x: 7.2499704, y: 46}
+      - {x: 7.2499704, y: 52}
+      - {x: 2, y: 51.999973}
+      - {x: 2.0000293, y: 50}
+      - {x: 7, y: 49.999973}
+      - {x: 7.0000296, y: 46}
+    - - {x: -5.000029, y: 46}
+      - {x: -4.9999704, y: 50}
+      - {x: 0, y: 50.00003}
+      - {x: -0.000029300001, y: 52}
+      - {x: -5.25, y: 51.999973}
+      - {x: -5.249971, y: 46}
+    - - {x: 7.2499704, y: 39.75}
+      - {x: 7.2499704, y: 44}
+      - {x: 7, y: 43.999973}
+      - {x: 6.9999704, y: 40}
+      - {x: 2, y: 39.999973}
+      - {x: 2.0000293, y: 39.75}
+    - - {x: -0.000029300001, y: 39.75}
+      - {x: -0.000029300001, y: 40}
+      - {x: -5, y: 40.00003}
+      - {x: -5.000029, y: 44}
+      - {x: -5.25, y: 43.999973}
+      - {x: -5.249971, y: 39.75}
+  m_VertexDistance: 0.0005
+  m_OffsetDistance: 0.00005
+  m_UseDelaunayMesh: 0
+  m_CompositeGameObject: {fileID: 7621138786246224332}
 --- !u!1 &7768884678054724918
 GameObject:
   m_ObjectHideFlags: 0
@@ -2853,6 +3511,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7514527414105938003}
   - component: {fileID: 8898020563327557667}
+  - component: {fileID: 4522028989700652463}
   m_Layer: 0
   m_Name: TX Player S (2)
   m_TagString: Untagged
@@ -2933,7 +3592,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &4522028989700652463
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7768884678054724918}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.109955765}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.96875}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.21991153}
+  m_EdgeRadius: 0
 --- !u!1 &8726042583302422257
 GameObject:
   m_ObjectHideFlags: 0
@@ -2944,6 +3649,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4373569342914235708}
   - component: {fileID: 2077218276266552793}
+  - component: {fileID: 3581046136919042626}
   m_Layer: 0
   m_Name: TX Player F (3)
   m_TagString: Untagged
@@ -3024,7 +3730,53 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
+--- !u!61 &3581046136919042626
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8726042583302422257}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.10809931}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0.03125, z: 0, w: 0.9375}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.65625, y: 1.5}
+    newSize: {x: 0.65625, y: 1.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.65625, y: 0.21619862}
+  m_EdgeRadius: 0
 --- !u!1 &9040300072486664473
 GameObject:
   m_ObjectHideFlags: 0

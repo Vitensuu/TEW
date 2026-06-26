@@ -19,20 +19,20 @@ namespace Game.Dungeon
         [SerializeField] GameObject bossPrefab;
 
         [Header("Fallback-спавн (если в комнате нет точек SpawnKind.Enemy)")]
-        [SerializeField] int fallbackMin = 2;
-        [SerializeField] int fallbackMax = 4;
+        [SerializeField] int fallbackMin = 1;
+        [SerializeField] int fallbackMax = 3;
 
         [Header("Элиты (Фаза 2)")]
         [Tooltip("Шанс, что заспавненный враг станет элитным (получит EliteModifier)")]
-        [Range(0f, 1f)] [SerializeField] float eliteChance = 0.12f;
+        [Range(0f, 1f)] [SerializeField] float eliteChance = 0.06f;
 
         [Header("Связи (Фаза 3)")]
         [Tooltip("Шанс, что в комнате (>=2 врага) появится носитель CorruptionLink")]
-        [Range(0f, 1f)] [SerializeField] float hexbinderChance = 0.15f;
+        [Range(0f, 1f)] [SerializeField] float hexbinderChance = 0.08f;
 
         [Header("Эволюция (Фаза 5)")]
         [Tooltip("Шанс, что враг получит эволюцию-ярость на <50% HP")]
-        [Range(0f, 1f)] [SerializeField] float evolveChance = 0.1f;
+        [Range(0f, 1f)] [SerializeField] float evolveChance = 0.05f;
 
         void Awake()  => Game.Core.ServiceLocator.Register(this);     // ТЗ §6 — развязка
         void OnDestroy() => Game.Core.ServiceLocator.Unregister(this);
@@ -56,11 +56,20 @@ namespace Game.Dungeon
                 return spawned;
             }
 
-            // Normal / Elite — по точкам спавна.
+            // Лимит врагов на комнату из FloorConfig (раньше не использовался) — чтобы
+            // комнаты с большим числом точек спавна не были перегружены.
+            int cap = cfg != null ? Mathf.Max(1, cfg.maxEnemiesPerRoom) : fallbackMax;
+
+            // Normal / Elite — по точкам спавна, но не больше лимита этажа.
             if (room.EnemyPoints.Count > 0)
             {
-                foreach (var pt in room.EnemyPoints)
+                // Перемешиваем точки: при срабатывании лимита выбираются случайные,
+                // а не всегда первые по порядку.
+                var points = new List<SpawnPoint>(room.EnemyPoints);
+                Shuffle(points);
+                foreach (var pt in points)
                 {
+                    if (spawned.Count >= cap) break;
                     if (Random.value > pt.chance) continue;
                     var prefab = ResolveEnemy(cfg);
                     if (prefab != null)
@@ -70,7 +79,7 @@ namespace Game.Dungeon
             else
             {
                 // Fallback: точек нет (голый визуальный префаб) — спавним по площади пола.
-                int count = Random.Range(fallbackMin, fallbackMax + 1);
+                int count = Mathf.Min(cap, Random.Range(fallbackMin, fallbackMax + 1));
                 for (int i = 0; i < count; i++)
                 {
                     var prefab = ResolveEnemy(cfg);
@@ -111,6 +120,15 @@ namespace Game.Dungeon
                     go.AddComponent<HexbinderCaster>();
                     return;
                 }
+            }
+        }
+
+        static void Shuffle<T>(List<T> list)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
             }
         }
 

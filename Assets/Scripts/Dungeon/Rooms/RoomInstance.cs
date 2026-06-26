@@ -24,6 +24,9 @@ namespace Game.Dungeon
 
         [Header("Авто-конфигурация визуального префаба")]
         [SerializeField] bool autoConfigure = true;
+        [Tooltip("Строить периметр коллайдеров (BoundaryWalls) автоматически. " +
+                 "ВЫКЛ, если коллайдеры стен расставлены вручную — иначе появятся лишние/смещённые.")]
+        [SerializeField] bool autoBuildColliders = false;
         [Tooltip("Имя тайлмапа пола (по подстроке имени объекта)")]
         [SerializeField] string floorTilemapNameHint = "Floor";
         [SerializeField] string obstacleLayerName = "Obstacle";
@@ -38,6 +41,8 @@ namespace Game.Dungeon
 
         // вычисленный локальный центр комнаты (по тайлмапу пола), смещение от корня
         Vector3 _localCenter;
+        // true — периметр коллайдеров сгенерирован автоматически (нет ручной разметки)
+        bool _autoWalls;
 
         // ── Собранные дочерние элементы ─────────────────────────────────────────
         public readonly List<RoomConnection> Connections = new List<RoomConnection>();
@@ -98,10 +103,22 @@ namespace Game.Dungeon
             if (GetComponentsInChildren<RoomConnection>(true).Length == 0)
                 GenerateConnectionPoints();
 
-            // 4. BoxCollider2D периметр с зазорами для проходов вместо TilemapCollider2D.
-            //    Так проходы остаются открытыми независимо от тайлмапа стен.
-            if (transform.Find("BoundaryWalls") == null)
+            // 4. BoxCollider2D периметр с зазорами для проходов — ТОЛЬКО если дизайнер
+            //    НЕ расставил коллайдеры стен вручную. Иначе авто-стены наложатся на
+            //    ручные и будут «смещены». Триггеры (точки спавна/encounter) игнорируем.
+            if (autoBuildColliders && transform.Find("BoundaryWalls") == null && !HasManualColliders())
+            {
                 GenerateBoundaryColliders();
+                _autoWalls = true;
+            }
+        }
+
+        /// <summary>Есть ли «твёрдый» (не-триггер) коллайдер — признак ручной разметки стен.</summary>
+        bool HasManualColliders()
+        {
+            foreach (var c in GetComponentsInChildren<Collider2D>(true))
+                if (c != null && !c.isTrigger) return true;
+            return false;
         }
 
         void GenerateConnectionPoints()
@@ -190,6 +207,9 @@ namespace Game.Dungeon
         /// </summary>
         public void SealDoor(Direction localDir)
         {
+            // Ручная разметка коллайдеров → ассемблер не достраивает авто-стены.
+            if (!_autoWalls) return;
+
             float hx = footprint.x * 0.5f, hy = footprint.y * 0.5f;
             float dh = doorGapWidth * 0.5f;
             int layer = LayerMask.NameToLayer(obstacleLayerName);

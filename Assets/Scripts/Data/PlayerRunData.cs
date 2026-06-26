@@ -19,6 +19,7 @@ namespace Game.Data
         public int   gold;
 
         public int   enemiesKilled;
+        public int   itemsUsed;        // использованные расходники (для статистики)
         public float runTimeSeconds;
 
         public List<ItemInstance> inventory    = new List<ItemInstance>();

@@ -84,16 +84,26 @@ namespace Game.Combat
         void MeleeAttack(Vector2 aim)
         {
             Vector2 center = (Vector2)transform.position + aim * (activeWeapon.range * 0.5f);
-            var hits = Physics2D.OverlapCircleAll(center, activeWeapon.range * 0.6f, enemyMask);
+
+            // Если enemyMask не настроен в инспекторе (== 0), OverlapCircle с такой маской
+            // ничего не находит и игрок «не может бить врагов». Фолбэк: бьём по всем слоям
+            // и отсеиваем не-врагов (самого игрока) по IDamageable ниже.
+            int mask = enemyMask.value != 0 ? enemyMask.value : Physics2D.AllLayers;
+            var hits = Physics2D.OverlapCircleAll(center, activeWeapon.range * 0.6f, mask);
+
+            int hitCount = 0;
+            int maxTargets = activeWeapon.attackPattern == AttackPattern.Piercing
+                ? int.MaxValue
+                : Mathf.Max(1, activeWeapon.patternCount);
 
             foreach (var h in hits)
             {
                 var dmg = h.GetComponentInParent<IDamageable>();
                 if (dmg == null || !dmg.IsAlive) continue;
+                if (h.transform.root == transform.root) continue; // не бьём самого игрока
                 ApplyHit(dmg, h.transform.position);
 
-                if (activeWeapon.attackPattern != AttackPattern.Piercing)
-                    if (System.Array.IndexOf(hits, h) >= activeWeapon.patternCount) break;
+                if (++hitCount >= maxTargets) break;
             }
         }
 

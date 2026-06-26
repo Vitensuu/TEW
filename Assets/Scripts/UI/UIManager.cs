@@ -15,6 +15,8 @@ namespace Game.UI
         [SerializeField] GameObject hudPanel;
         [SerializeField] GameObject pausePanel;
         [SerializeField] GameObject inventoryPanel;
+        [Tooltip("Экран победы — оверлей в игровой сцене (показывается в GameState.Victory)")]
+        [SerializeField] GameObject victoryPanel;
 
         protected override void Awake()
         {
@@ -42,8 +44,9 @@ namespace Game.UI
 
         void HandleState(GameState state)
         {
-            if (pausePanel != null) pausePanel.SetActive(state == GameState.Paused);
-            if (hudPanel != null)   hudPanel.SetActive(state == GameState.Playing || state == GameState.Paused);
+            if (pausePanel != null)   pausePanel.SetActive(state == GameState.Paused);
+            if (victoryPanel != null) victoryPanel.SetActive(state == GameState.Victory);
+            if (hudPanel != null)     hudPanel.SetActive(state == GameState.Playing || state == GameState.Paused);
         }
 
         public void ToggleInventory()

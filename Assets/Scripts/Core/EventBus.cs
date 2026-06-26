@@ -20,6 +20,7 @@ namespace Game.Core
 
         // ── Жизненный цикл забега ──────────────────────────────────────────────
         public static event Action OnPlayerDeath;
+        public static event Action OnVictory;              // убит финальный босс последнего этажа
         public static event Action<int> OnFloorComplete;   // floorNumber
         public static event Action<int> OnFloorGenerated;  // floorNumber
 
@@ -34,6 +35,7 @@ namespace Game.Core
 
         // ── Триггеры ────────────────────────────────────────────────────────────
         public static void TriggerPlayerDeath()              => OnPlayerDeath?.Invoke();
+        public static void TriggerVictory()                  => OnVictory?.Invoke();
         public static void TriggerFloorComplete(int f)       => OnFloorComplete?.Invoke(f);
         public static void TriggerFloorGenerated(int f)      => OnFloorGenerated?.Invoke(f);
         public static void TriggerItemPickup(ItemData item)  => OnItemPickup?.Invoke(item);
@@ -47,6 +49,7 @@ namespace Game.Core
         public static void Clear()
         {
             OnPlayerDeath = null;
+            OnVictory = null;
             OnFloorComplete = null;
             OnFloorGenerated = null;
             OnItemPickup = null;

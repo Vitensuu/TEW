@@ -125,12 +125,12 @@ TextureImporter:
       name: "leather_armor-43 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_0"
       rect:
         serializedVersion: 2
-        x: 0
+        x: 15
         y: 192
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        width: 27
+        height: 60
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -147,12 +147,12 @@ TextureImporter:
       name: "leather_armor-43 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_1"
       rect:
         serializedVersion: 2
-        x: 0
-        y: 128
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 8
+        y: 130
+        width: 47
+        height: 51
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -169,12 +169,12 @@ TextureImporter:
       name: "leather_armor-43 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_2"
       rect:
         serializedVersion: 2
-        x: 0
+        x: 17
         y: 64
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        width: 30
+        height: 58
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -191,12 +191,12 @@ TextureImporter:
       name: "leather_armor-43 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_3"
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 9
+        y: 2
+        width: 47
+        height: 51
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -223,7 +223,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":4.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       "leather_armor-43 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_0": -5009374893408648600
       "leather_armor-43 (\u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044B\u0438\u0306)_1": 7642092807148290047

@@ -53,5 +53,7 @@ namespace Game.Data
         public List<BossPhase> phases = new List<BossPhase>();
         public AudioClip bossMusic;
         public ItemData guaranteedLoot;
+        [Tooltip("Финальный босс последнего этажа — его смерть = Victory (ТЗ §6)")]
+        public bool isFinalBoss;
     }
 }

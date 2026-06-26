@@ -142,6 +142,10 @@ namespace Game.Items
             var inst = _consumables[index];
             ConsumableEffects.Apply(inst.AsConsumable, user);
 
+            // Учёт использованных предметов для статистики (ТЗ §6 — Victory).
+            var run = Game.Core.GameManager.Instance != null ? Game.Core.GameManager.Instance.Run : null;
+            if (run != null) run.itemsUsed++;
+
             if (--inst.stackCount <= 0) _consumables.RemoveAt(index);
             OnChanged?.Invoke();
             return true;

@@ -29,6 +29,11 @@ namespace Enemy
         [SerializeField] protected float attackRange  = 0.8f;
         [SerializeField] protected float attackCooldown = 1.2f;
 
+        [Tooltip("Длительность замаха перед ударом (сек). Враг подсвечивается красным, " +
+                 "урон наносится только в КОНЦЕ замаха — это окно, чтобы игрок успел увернуться. " +
+                 "0 = мгновенный удар (старое поведение, увернуться нельзя).")]
+        [SerializeField] protected float attackWindup = 0.45f;
+
         // Animator параметры
         static readonly int AnimIsMoving      = Animator.StringToHash("isMoving");
         static readonly int AnimIsAttacking   = Animator.StringToHash("isAttacking"); // Bool
@@ -52,6 +57,9 @@ namespace Enemy
         [Tooltip("Sorting Order спрайта врага. Должен быть выше декора комнаты (1–3), " +
                  "иначе враг рендерится ПОД ассетами комнаты и не виден.")]
         [SerializeField] protected int spriteSortingOrder = 6;
+
+        /// <summary>Sorting order спрайта врага — для UI поверх него (HP-бар).</summary>
+        public int SpriteSortingOrder => spriteSortingOrder;
 
         protected Rigidbody2D    Rb;
         protected Animator       Anim;
@@ -95,17 +103,16 @@ namespace Enemy
             Rb.gravityScale = 0f;
             Rb.constraints  = RigidbodyConstraints2D.FreezeRotation;
 
-            // Коллайдер обязателен: без него врага не бьёт игрок (OverlapCircle по
-            // enemyMask), не ловят HazardZone/CorruptionLink/рескан комнаты. Базовые
-            // префабы его не имеют — добавляем гарантированно.
-            if (GetComponent<Collider2D>() == null)
-            {
-                var col = gameObject.AddComponent<CircleCollider2D>();
-                col.radius = 0.4f;
-            }
+            // Коллайдер НЕ создаём автоматически — он настраивается на префабе вручную.
+            // (Для попаданий игрока/HazardZone/связей у врага должен быть Collider2D.)
 
             ApplyData();
             Hp = maxHp;
+
+            // Плавающая полоска HP над врагом (видно, что урон проходит). Авто-добавляем,
+            // чтобы не править каждый префаб вручную.
+            if (GetComponent<Game.UI.EnemyHealthBar>() == null)
+                gameObject.AddComponent<Game.UI.EnemyHealthBar>();
         }
 
         /// <summary>Подтянуть характеристики из EnemyData, если назначен.</summary>
@@ -233,21 +240,43 @@ namespace Enemy
         {
             if (!CanAttack()) return;
             AttackTimer = attackCooldown;
-
-            // Включаем Bool isAttacking → анимация атаки
-            Anim.SetBool(AnimIsAttacking, true);
-            // Trigger для совместимости если используется
-            if (HasAnimParam(AnimAttackTrigger)) Anim.SetTrigger(AnimAttackTrigger);
-
-            ApplyAttackDamage(target);
-
-            // Сбрасываем isAttacking после кулдауна → анимация вернётся в Idle/Walk
-            StartCoroutine(ResetAttackAnim());
+            StartCoroutine(AttackRoutine(target));
         }
 
-        System.Collections.IEnumerator ResetAttackAnim()
+        /// <summary>
+        /// Атака с замахом-телеграфом: сначала видимое предупреждение (анимация замаха +
+        /// подсветка спрайта), и только в КОНЦЕ замаха проверяется дистанция и наносится
+        /// урон. Если игрок за время замаха вышел из attackRange — удар проходит мимо.
+        /// Так удар становится виден и от него можно увернуться (attackWindup = 0 —
+        /// мгновенный удар, как раньше).
+        /// </summary>
+        System.Collections.IEnumerator AttackRoutine(Transform target)
         {
-            yield return new WaitForSeconds(attackCooldown * 0.8f);
+            // Включаем Bool isAttacking → анимация атаки/замаха
+            Anim.SetBool(AnimIsAttacking, true);
+            if (HasAnimParam(AnimAttackTrigger)) Anim.SetTrigger(AnimAttackTrigger);
+
+            Color baseColor = Sr != null ? Sr.color : Color.white;
+
+            // Фаза замаха: пульсирующая красная подсветка — визуальный телеграф удара.
+            float t = 0f;
+            while (t < attackWindup)
+            {
+                if (IsDead) { if (Sr != null) Sr.color = baseColor; yield break; }
+                if (Sr != null)
+                    Sr.color = Color.Lerp(baseColor, Color.red, Mathf.PingPong(t * 6f, 1f));
+                t += Time.deltaTime;
+                yield return null;
+            }
+            if (Sr != null) Sr.color = baseColor;
+
+            // Урон в конце замаха. ApplyAttackDamage сам проверит дистанцию —
+            // если игрок увернулся (вышел за attackRange), удар пройдёт мимо.
+            if (!IsDead) ApplyAttackDamage(target);
+
+            // Сбрасываем isAttacking ближе к концу кулдауна → анимация вернётся в Idle/Walk
+            float rest = Mathf.Max(0f, attackCooldown * 0.8f - attackWindup);
+            if (rest > 0f) yield return new WaitForSeconds(rest);
             if (!IsDead) Anim.SetBool(AnimIsAttacking, false);
         }
 

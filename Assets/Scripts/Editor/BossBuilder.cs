@@ -54,6 +54,7 @@ namespace Game.DungeonEditor
             boss.attackCooldown = 2f;
             boss.behaviorType   = BehaviorType.Boss;
             boss.roles          = EnemyRole.Elite;
+            boss.isFinalBoss    = true;   // смерть Нихиля → Victory (ТЗ §6)
 
             boss.phases = new System.Collections.Generic.List<BossPhase>
             {

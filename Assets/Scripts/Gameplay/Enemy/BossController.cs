@@ -219,6 +219,10 @@ namespace Enemy
             if (_boss != null && _boss.guaranteedLoot != null)
                 LootDropper.Spawn(_boss.guaranteedLoot, transform.position);
 
+            // Финальный босс → Victory (ТЗ §6). Обычный босс просто завершает этаж.
+            if (_boss != null && _boss.isFinalBoss)
+                EventBus.TriggerVictory();
+
             base.Die();
         }
 

@@ -22,9 +22,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6ac9d51e4c532421ab12d8cdccaf5de9, type: 2}
   - {fileID: 11400000, guid: 4d140f0ad0851408fb206b3561c84389, type: 2}
   - {fileID: 11400000, guid: 0c79d5fb8d5f14ba29dedf95c19d4971, type: 2}
-  minEnemiesPerRoom: 2
-  maxEnemiesPerRoom: 4
-  hasBoss: 0
+  minEnemiesPerRoom: 0
+  maxEnemiesPerRoom: 2
+  hasBoss: 1
   bossData: {fileID: 0}
   shopChance: 0
   shrineChance: 0
