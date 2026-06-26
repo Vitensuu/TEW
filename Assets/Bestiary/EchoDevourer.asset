@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e64eee7a8492400aa0d13d1751829c4, type: 3}
+  m_Name: EchoDevourer
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Data.EnemyData
+  enemyName: "\u041F\u043E\u0436\u0438\u0440\u0430\u0442\u0435\u043B\u044C \u042D\u0445\u0430"
+  maxHealth: 50
+  damage: 9
+  speed: 3.2
+  detectionRange: 100
+  attackRange: 0.9
+  attackCooldown: 1.2
+  behaviorType: 2
+  roles: 544
+  expReward: 8
+  goldReward: 5
+  lootTable: []
+  spritePrefab: {fileID: 4388917415863677536, guid: 73d2955feb1aa47e79c0dc8e3b2ee3e3, type: 3}

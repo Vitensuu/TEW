@@ -41,6 +41,8 @@ namespace Enemy
 
         // IDamageable: (current, max)
         public event System.Action<float, float> OnHealthChanged;
+        /// <summary>Смерть врага (Фаза 6): для предсмертных эффектов компонентов (PlagueBearer и т.п.).</summary>
+        public event System.Action Died;
         public bool IsAlive => !IsDead;
 
         protected float          Hp;
@@ -51,6 +53,31 @@ namespace Enemy
         protected Animator       Anim;
         protected SpriteRenderer Sr;
 
+        // ── Элитные модификаторы (Фаза 2) ───────────────────────────────────────
+        readonly System.Collections.Generic.List<EliteModifier> _modifiers
+            = new System.Collections.Generic.List<EliteModifier>();
+
+        /// <summary>Множитель наносимого урона (Berserker и т.п.).</summary>
+        [System.NonSerialized] public float damageDealtMultiplier = 1f;
+
+        /// <summary>
+        /// Фильтр входящего урона (CorruptionLink: щит/перенос на якорь). Принимает
+        /// (урон, тип), возвращает урон, который реально применить. null — нет фильтра.
+        /// </summary>
+        [System.NonSerialized] public System.Func<float, DamageType, float> IncomingDamageFilter;
+
+        /// <summary>Модификатор саморегистрируется здесь при инициализации.</summary>
+        public void RegisterModifier(EliteModifier m)
+        {
+            if (m != null && !_modifiers.Contains(m)) _modifiers.Add(m);
+        }
+
+        /// <summary>Оповестить модификаторы о нанесённом уроне (Toxic/Vampiric).</summary>
+        protected void NotifyDealtDamage(Game.Core.IDamageable target, float amount)
+        {
+            for (int i = 0; i < _modifiers.Count; i++) _modifiers[i].OnDealtDamage(target, amount);
+        }
+
         protected virtual void Awake()
         {
             Rb   = GetComponent<Rigidbody2D>();
@@ -59,6 +86,15 @@ namespace Enemy
 
             Rb.gravityScale = 0f;
             Rb.constraints  = RigidbodyConstraints2D.FreezeRotation;
+
+            // Коллайдер обязателен: без него врага не бьёт игрок (OverlapCircle по
+            // enemyMask), не ловят HazardZone/CorruptionLink/рескан комнаты. Базовые
+            // префабы его не имеют — добавляем гарантированно.
+            if (GetComponent<Collider2D>() == null)
+            {
+                var col = gameObject.AddComponent<CircleCollider2D>();
+                col.radius = 0.4f;
+            }
 
             ApplyData();
             Hp = maxHp;
@@ -88,6 +124,8 @@ namespace Enemy
         public virtual void TakeDamage(float amount, DamageType type = DamageType.Physical)
         {
             if (IsDead) return;
+            for (int i = 0; i < _modifiers.Count; i++) amount = _modifiers[i].ModifyIncomingDamage(amount);
+            if (IncomingDamageFilter != null) amount = IncomingDamageFilter(amount, type);
             Hp = Mathf.Max(0f, Hp - amount);
             OnHpChanged?.Invoke(Hp / maxHp);
             OnHealthChanged?.Invoke(Hp, maxHp);
@@ -105,13 +143,30 @@ namespace Enemy
             OnHealthChanged?.Invoke(Hp, maxHp);
         }
 
+        /// <summary>
+        /// Изменить максимальное HP при эволюции (Фаза 5): множитель maxHp с
+        /// опциональным долечиванием. Урон/скорость эволюция меняет через
+        /// damageDealtMultiplier / SpeedBuff. Анимации не трогаются.
+        /// </summary>
+        public void EvolveStats(float maxHpMult, bool healToFull)
+        {
+            float ratio = maxHp > 0f ? Hp / maxHp : 1f;
+            maxHp = Mathf.Max(1f, maxHp * maxHpMult);
+            Hp = healToFull ? maxHp : Mathf.Clamp(maxHp * ratio, 1f, maxHp);
+            OnHpChanged?.Invoke(Hp / maxHp);
+            OnHealthChanged?.Invoke(Hp, maxHp);
+        }
+
         protected virtual void Die()
         {
             IsDead = true;
+            for (int i = 0; i < _modifiers.Count; i++) _modifiers[i].OnHostDeath();
+            Died?.Invoke();
             Rb.linearVelocity = Vector2.zero;
             Anim.SetTrigger(AnimIsDead);
             // Физику отключаем чтобы труп не мешал
-            GetComponent<Collider2D>().enabled = false;
+            var deadCol = GetComponent<Collider2D>();
+            if (deadCol != null) deadCol.enabled = false;
 
             GrantRewardsAndLoot();
             EventBus.TriggerEnemyKilled(this);
@@ -214,7 +269,9 @@ namespace Enemy
                     " — добавь компонент PlayerHealth на объект игрока!");
                 return;
             }
-            ph.TakeDamage(attackDamage);
+            float dmg = attackDamage * damageDealtMultiplier;
+            ph.TakeDamage(dmg);
+            NotifyDealtDamage(ph, dmg);
         }
 
         // ── Публичные свойства ─────────────────────────────────────────────────

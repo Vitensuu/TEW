@@ -32,6 +32,7 @@ namespace Game.Combat
         PlayerStats _stats;
         float _cooldownTimer;
         Camera _cam;
+        StatusEffectHandler _status;
         readonly System.Random _rng = new System.Random();
 
         public WeaponData ActiveWeapon => activeWeapon;
@@ -48,6 +49,10 @@ namespace Game.Combat
         void Update()
         {
             if (_cooldownTimer > 0f) _cooldownTimer -= Time.deltaTime;
+
+            // Stun (ТЗ §4): оглушённый игрок не атакует.
+            if (_status == null) _status = GetComponent<StatusEffectHandler>();
+            if (_status != null && _status.IsStunned) return;
 
             // Подтянуть активное оружие из инвентаря, если не задано.
             if (activeWeapon == null && InventoryManager.Instance != null)

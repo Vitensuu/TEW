@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     private Vector2        moveInput;
     private PlayerAnimator playerAnimator;
     private Game.Player.PlayerStats stats; // ТЗ §5 — скорость из пересчитанных статов
+    private Game.Combat.StatusEffectHandler status; // Freeze/Stun/Poison от зон и врагов
 
     void Start()
     {
@@ -17,6 +18,26 @@ public class PlayerController : MonoBehaviour
         playerAnimator = GetComponent<PlayerAnimator>();
         stats          = GetComponent<Game.Player.PlayerStats>();
         if (stats != null && stats.Speed > 0f) moveSpeed = stats.Speed;
+
+        // Обработчик статус-эффектов: даёт игроку Freeze/Stun/Poison от HazardZone,
+        // модификаторов Frozen/Toxic и босса (DoT идёт через PlayerHealth : IDamageable).
+        status = GetComponent<Game.Combat.StatusEffectHandler>();
+        if (status == null) status = gameObject.AddComponent<Game.Combat.StatusEffectHandler>();
+
+        // Добавить коллайдер если его нет
+        if (GetComponent<Collider2D>() == null)
+        {
+            var col = gameObject.AddComponent<CapsuleCollider2D>();
+            col.size = new Vector2(0.5f, 0.7f);
+            col.offset = new Vector2(0f, 0f);
+        }
+
+        // Заморозить вращение чтобы персонаж не вращался при столкновении
+        if (rb != null)
+        {
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        }
     }
 
     void Update()
@@ -53,6 +74,9 @@ public class PlayerController : MonoBehaviour
         // Соединяем в один вектор и нормализуем (чтобы не было ускорения по диагонали)
         moveInput = new Vector2(moveX, moveY).normalized;
 
+        // Stun (ТЗ §4): полная остановка — нельзя двигаться.
+        if (status != null && status.IsStunned) moveInput = Vector2.zero;
+
         if (keyboard.eKey.wasPressedThisFrame)
             playerAnimator?.TriggerAttack();
     }
@@ -61,8 +85,9 @@ public class PlayerController : MonoBehaviour
     {
         if (rb != null)
         {
-            // Применяем скорость к Rigidbody2D (в Unity 2024+ используется linearVelocity)
-            rb.linearVelocity = moveInput * moveSpeed;
+            // Freeze (ТЗ §4): SpeedMultiplier < 1 замедляет игрока в ледяных зонах/ауре.
+            float slow = status != null ? status.SpeedMultiplier : 1f;
+            rb.linearVelocity = moveInput * moveSpeed * slow;
         }
     }
 }

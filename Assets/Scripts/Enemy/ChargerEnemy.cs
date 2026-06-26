@@ -4,118 +4,101 @@ using Game.Combat;
 namespace Enemy
 {
     /// <summary>
-    /// Враг-таран (ТЗ §4 — «ускоряется к игроку, после промаха — stun»).
-    /// State Machine: Idle → Chase → WindUp → Charge → (Hit | Miss→Stun).
+    /// Враг-таран на единой FSM (<see cref="StateMachineEnemy"/>):
+    /// Idle → Chase → Special (windup → charge → recover). Промах рывка → самостан.
+    /// Рывок — таймированная последовательность, поэтому держит LockState и сам
+    /// владеет переходами. Поведение идентично прежней версии.
     /// </summary>
-    public class ChargerEnemy : EnemyBase
+    public class ChargerEnemy : StateMachineEnemy
     {
-        [Header("Charger AI")]
-        [SerializeField] float moveSpeed      = 2f;
-        [SerializeField] float detectionRange = 7f;
+        [Header("Charger")]
         [SerializeField] float chargeRange    = 4.5f;  // дистанция начала рывка
         [SerializeField] float chargeSpeed    = 11f;
         [SerializeField] float windUpTime     = 0.5f;
         [SerializeField] float chargeDuration = 0.6f;
         [SerializeField] float missStunTime   = 1.5f;
 
-        enum CState { Idle, Chase, WindUp, Charge, Recover }
-        CState _state = CState.Idle;
-
-        Transform _player;
-        StatusEffectHandler _status;
+        enum ChargePhase { WindUp, Charge, Recover }
+        ChargePhase _phase;
         Vector2 _chargeDir;
-        float _timer;
-        bool _hitDuringCharge;
+        float   _timer;
+        bool    _hitDuringCharge;
 
-        protected override void Awake()
+        protected override EnemyState DecideState(float dist)
         {
-            base.Awake();
-            _status = GetComponent<StatusEffectHandler>();
+            if (dist > detectionRange) return EnemyState.Idle;
+            if (dist <= chargeRange)   return EnemyState.Special; // начать рывок
+            return EnemyState.Chase;
         }
 
-        void Start()
+        protected override void OnEnterState(EnemyState s)
         {
-            var p = GameObject.FindGameObjectWithTag("Player");
-            if (p != null) _player = p.transform;
+            if (s != EnemyState.Special) return;
+            // Старт рывка: фиксируем направление и блокируем переходы.
+            _phase     = ChargePhase.WindUp;
+            _timer     = windUpTime;
+            _chargeDir = DirToPlayer;
+            FaceDirection(_chargeDir);
+            LockState  = true;
+            StopMoving();
         }
 
-        protected override void Update()
+        protected override void OnChase()
         {
-            base.Update();
-            if (IsDead || _player == null) return;
-            if (_status != null && _status.IsStunned) { Stop(); return; }
+            MoveInDirection(DirToPlayer, moveSpeed * SpeedMul);
+        }
 
-            float dist = Vector2.Distance(transform.position, _player.position);
-            float speedMul = _status != null ? _status.SpeedMultiplier : 1f;
-            Vector2 toPlayer = ((Vector2)_player.position - (Vector2)transform.position).normalized;
-
-            switch (_state)
+        protected override void OnSpecial()
+        {
+            float dt = Time.deltaTime;
+            switch (_phase)
             {
-                case CState.Idle:
-                    Stop();
-                    if (dist <= detectionRange) _state = CState.Chase;
-                    break;
-
-                case CState.Chase:
-                    Rb.linearVelocity = toPlayer * moveSpeed * speedMul;
-                    SetMoving(toPlayer);
-                    if (dist > detectionRange) _state = CState.Idle;
-                    else if (dist <= chargeRange) BeginWindUp(toPlayer);
-                    break;
-
-                case CState.WindUp:
-                    Stop();
-                    _timer -= Time.deltaTime;
+                case ChargePhase.WindUp:
+                    StopMoving();
+                    _timer -= dt;
                     if (_timer <= 0f)
                     {
-                        _state = CState.Charge;
+                        _phase = ChargePhase.Charge;
                         _timer = chargeDuration;
                         _hitDuringCharge = false;
                     }
                     break;
 
-                case CState.Charge:
-                    Rb.linearVelocity = _chargeDir * chargeSpeed;
-                    SetMoving(_chargeDir);
-                    if (dist <= attackRange) { HitPlayer(); _hitDuringCharge = true; }
-                    _timer -= Time.deltaTime;
+                case ChargePhase.Charge:
+                    MoveInDirection(_chargeDir, chargeSpeed);
+                    if (DistanceToPlayer <= attackRange) { HitPlayer(); _hitDuringCharge = true; }
+                    _timer -= dt;
                     if (_timer <= 0f)
                     {
-                        Stop();
-                        // Промах → самостан (ТЗ §4).
-                        if (!_hitDuringCharge && _status != null)
-                            _status.Apply(StatusEffect.Stun, missStunTime);
-                        _state = CState.Recover;
+                        StopMoving();
+                        if (!_hitDuringCharge && Status != null)
+                            Status.Apply(StatusEffect.Stun, missStunTime); // промах → самостан (ТЗ §4)
+                        _phase = ChargePhase.Recover;
                         _timer = 0.4f;
                     }
                     break;
 
-                case CState.Recover:
-                    Stop();
-                    _timer -= Time.deltaTime;
-                    if (_timer <= 0f) _state = CState.Chase;
+                case ChargePhase.Recover:
+                    StopMoving();
+                    _timer -= dt;
+                    if (_timer <= 0f)
+                    {
+                        LockState = false;
+                        SetState(EnemyState.Chase);
+                    }
                     break;
             }
         }
 
-        void BeginWindUp(Vector2 dir)
-        {
-            _state = CState.WindUp;
-            _timer = windUpTime;
-            _chargeDir = dir;
-            SetDirection(dir);
-        }
-
         void HitPlayer()
         {
-            var ph = _player.GetComponent<PlayerHealth>();
-            if (ph != null && ph.IsAlive) ph.TakeDamage(attackDamage);
-        }
-
-        void Stop()
-        {
-            Rb.linearVelocity = Vector2.zero;
-            SetMoving(Vector2.zero);
+            var ph = Player.GetComponent<PlayerHealth>();
+            if (ph != null && ph.IsAlive)
+            {
+                float dmg = attackDamage * damageDealtMultiplier;
+                ph.TakeDamage(dmg);
+                NotifyDealtDamage(ph, dmg);
+            }
         }
     }
 }

@@ -130,6 +130,7 @@ namespace Game.Dungeon
                 }
                 Debug.LogWarning($"[DungeonAssembler] Попытка {attempt + 1} провалена: {err}. Перегенерация.");
             }
+            ClearPlaced();
             Debug.LogError($"[DungeonAssembler] Не удалось собрать этаж за {maxAssembleAttempts} попыток. " +
                            "Проверь RoomLibrary (хватает ли префабов нужных типов и дверей).");
         }
@@ -206,7 +207,16 @@ namespace Game.Dungeon
                     Direction worldDir = ps.WorldDirection(parent.RotationStepsCW);
                     Direction needChildDir = worldDir.Opposite();
 
-                    foreach (var cs in candidate.FreeConnections())
+                    // Сортируем: сначала точки с 0 шагами (без вращения), потом остальные.
+                    var connsSorted = new List<RoomConnectionPoint>(candidate.FreeConnections());
+                    bool canRot = candidate.data != null && candidate.data.canRotate;
+                    connsSorted.Sort((a, b) =>
+                    {
+                        int stA = canRot ? a.direction.StepsTo(needChildDir) : (a.direction == needChildDir ? 0 : 4);
+                        int stB = canRot ? b.direction.StepsTo(needChildDir) : (b.direction == needChildDir ? 0 : 4);
+                        return stA.CompareTo(stB);
+                    });
+                    foreach (var cs in connsSorted)
                     {
                         int steps;
                         if (candidate.data != null && candidate.data.canRotate)
@@ -245,6 +255,13 @@ namespace Game.Dungeon
         // ── Финал: NavGrid, игрок, выход ────────────────────────────────────────
         void Finish(int usedSeed, int attempt)
         {
+            // Закрыть зазоры у неиспользованных проходов (тупики периметра).
+            foreach (var room in _placed)
+            {
+                foreach (var conn in room.Connections)
+                    if (!conn.used) room.SealDoor(conn.direction);
+            }
+
             Nav = NavGridBuilder.Build(TotalBounds(), obstacleMask, navCellSize);
 
             var startInst = Graph.Start?.Instance;
@@ -258,7 +275,11 @@ namespace Game.Dungeon
                 ? exitInst.ExitPoint.position
                 : (exitInst != null ? exitInst.transform.position : StartWorldPosition);
 
-            if (player != null) player.position = StartWorldPosition;
+            if (player != null)
+            {
+                Transform altarSpawn = FindNamedSpawn("TX Props Altar");
+                player.position = altarSpawn != null ? altarSpawn.position : StartWorldPosition;
+            }
 
             OnFloorAssembled?.Invoke(FloorNumber);
             Game.Core.EventBus.TriggerFloorGenerated(FloorNumber);
@@ -308,6 +329,20 @@ namespace Game.Dungeon
             foreach (var r in _placed) if (r != null) Destroy(r.gameObject);
             _placed.Clear();
             if (_root != null) { Destroy(_root.gameObject); _root = null; }
+        }
+
+        /// <summary>Ищет дочерний объект с именем name во всех размещённых комнатах.</summary>
+        Transform FindNamedSpawn(string objectName)
+        {
+            foreach (var room in _placed)
+            {
+                if (room == null) continue;
+                foreach (var t in room.GetComponentsInChildren<Transform>(true))
+                {
+                    if (t.name == objectName) return t;
+                }
+            }
+            return null;
         }
 
         List<T> Shuffled<T>(List<T> list)

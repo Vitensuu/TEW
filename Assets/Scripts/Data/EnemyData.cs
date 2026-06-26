@@ -34,6 +34,8 @@ namespace Game.Data
 
         [Header("Поведение")]
         public BehaviorType behaviorType = BehaviorType.Melee;
+        [Tooltip("Тактические роли (флаги) — для синергий, модификаторов и связей")]
+        public EnemyRole roles = EnemyRole.None;
 
         [Header("Награды")]
         public int expReward  = 5;

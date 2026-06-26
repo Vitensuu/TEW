@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Game.Data;
+using Enemy;
 
 namespace Game.Dungeon
 {
@@ -20,6 +21,18 @@ namespace Game.Dungeon
         [Header("Fallback-спавн (если в комнате нет точек SpawnKind.Enemy)")]
         [SerializeField] int fallbackMin = 2;
         [SerializeField] int fallbackMax = 4;
+
+        [Header("Элиты (Фаза 2)")]
+        [Tooltip("Шанс, что заспавненный враг станет элитным (получит EliteModifier)")]
+        [Range(0f, 1f)] [SerializeField] float eliteChance = 0.12f;
+
+        [Header("Связи (Фаза 3)")]
+        [Tooltip("Шанс, что в комнате (>=2 врага) появится носитель CorruptionLink")]
+        [Range(0f, 1f)] [SerializeField] float hexbinderChance = 0.15f;
+
+        [Header("Эволюция (Фаза 5)")]
+        [Tooltip("Шанс, что враг получит эволюцию-ярость на <50% HP")]
+        [Range(0f, 1f)] [SerializeField] float evolveChance = 0.1f;
 
         /// <summary>Заселить одну комнату. Возвращает список заспавненных врагов.</summary>
         public List<GameObject> PopulateRoom(RoomInstance room, FloorConfig cfg, int floor)
@@ -48,7 +61,7 @@ namespace Game.Dungeon
                     if (Random.value > pt.chance) continue;
                     var prefab = ResolveEnemy(cfg);
                     if (prefab != null)
-                        spawned.Add(Instantiate(prefab, pt.transform.position, Quaternion.identity));
+                        spawned.Add(SpawnEnemy(prefab, pt.transform.position));
                 }
             }
             else
@@ -59,10 +72,43 @@ namespace Game.Dungeon
                 {
                     var prefab = ResolveEnemy(cfg);
                     if (prefab != null)
-                        spawned.Add(Instantiate(prefab, room.RandomFloorPoint(), Quaternion.identity));
+                        spawned.Add(SpawnEnemy(prefab, room.RandomFloorPoint()));
                 }
             }
+
+            TryAddHexbinder(spawned);
             return spawned;
+        }
+
+        /// <summary>Заспавнить врага и с шансом eliteChance сделать его элитным.</summary>
+        GameObject SpawnEnemy(GameObject prefab, Vector3 pos)
+        {
+            var go = Instantiate(prefab, pos, Quaternion.identity);
+            if (go.GetComponent<EnemyBase>() == null) return go;
+
+            if (Random.value <= eliteChance)
+            {
+                var types = (EliteModifierType[])System.Enum.GetValues(typeof(EliteModifierType));
+                EliteModifier.Attach(go, types[Random.Range(0, types.Length)]);
+            }
+            if (Random.value <= evolveChance)
+                EvolutionController.AttachEnrage(go);
+
+            return go;
+        }
+
+        /// <summary>С шансом hexbinderChance сделать одного врага носителем CorruptionLink.</summary>
+        void TryAddHexbinder(List<GameObject> spawned)
+        {
+            if (spawned.Count < 2 || Random.value > hexbinderChance) return;
+            foreach (var go in spawned)
+            {
+                if (go != null && go.GetComponent<EnemyBase>() != null)
+                {
+                    go.AddComponent<HexbinderCaster>();
+                    return;
+                }
+            }
         }
 
         GameObject ResolveEnemy(FloorConfig cfg)

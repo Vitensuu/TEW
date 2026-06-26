@@ -14,6 +14,27 @@ namespace Game.Data
     // ── Враги (ТЗ §3 — EnemyData) ──────────────────────────────────────────────
     public enum BehaviorType { Melee, Ranged, Charger, Summoner, Boss }
 
+    /// <summary>
+    /// Тактическая роль врага (флаги — враг может нести несколько).
+    /// Читается EncounterDirector'ом для синергий и слоями
+    /// (модификаторы/связи) при выборе целей. См. дизайн «Система ролей».
+    /// </summary>
+    [System.Flags]
+    public enum EnemyRole
+    {
+        None       = 0,
+        Bruiser    = 1 << 0,
+        Tank       = 1 << 1,
+        Support    = 1 << 2,
+        Summoner   = 1 << 3,
+        Controller = 1 << 4,
+        Assassin   = 1 << 5,
+        Hunter     = 1 << 6,
+        Disruptor  = 1 << 7,
+        Siege      = 1 << 8,
+        Elite      = 1 << 9,
+    }
+
     // ── Характеристики, на которые действуют модификаторы (ТЗ §3 — StatModifier) ─
     public enum StatType { MaxHealth, MaxMana, Speed, Attack, Defense, CritChance, CritMultiplier }
 

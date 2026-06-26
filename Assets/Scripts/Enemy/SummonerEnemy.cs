@@ -1,85 +1,68 @@
 using UnityEngine;
-using Game.Combat;
 
 namespace Enemy
 {
     /// <summary>
-    /// Призыватель (ТЗ §4 — «периодически призывает миньонов, уязвим в момент призыва»).
-    /// Держит дистанцию, периодически входит в Summon: останавливается, открывается
-    /// для урона (vulnerabilityMultiplier), спавнит миньонов.
+    /// Призыватель на единой FSM (<see cref="StateMachineEnemy"/>):
+    /// Idle (вне детекта) → Chase (держит дистанцию) → Special (призыв миньонов).
+    /// Во время призыва уязвим (vulnerabilityMultiplier) и стоит на месте.
+    /// Призыв — таймированная корутина, держит LockState. Поведение идентично прежней версии.
     /// </summary>
-    public class SummonerEnemy : EnemyBase
+    public class SummonerEnemy : StateMachineEnemy
     {
-        [Header("Summoner AI")]
-        [SerializeField] float moveSpeed      = 1.8f;
-        [SerializeField] float detectionRange = 9f;
+        [Header("Summoner")]
         [SerializeField] float keepDistance   = 6f;
         [SerializeField] float summonCooldown = 6f;
         [SerializeField] float summonCastTime = 1.5f;
 
         [Header("Призыв")]
         [SerializeField] GameObject minionPrefab;
-        [SerializeField] int minionsPerSummon = 2;
+        [SerializeField] int   minionsPerSummon = 2;
         [SerializeField] float summonRadius = 1.5f;
         [Tooltip("Множитель получаемого урона во время призыва (уязвимость)")]
         [SerializeField] float vulnerabilityMultiplier = 2f;
 
-        Transform _player;
-        StatusEffectHandler _status;
         float _summonTimer;
-        bool _isSummoning;
+        bool  _isSummoning;
 
         protected override void Awake()
         {
             base.Awake();
-            _status = GetComponent<StatusEffectHandler>();
             _summonTimer = summonCooldown;
         }
 
-        void Start()
+        protected override EnemyState DecideState(float dist)
+            => dist > detectionRange ? EnemyState.Idle : EnemyState.Chase;
+
+        protected override void OnChase()
         {
-            var p = GameObject.FindGameObjectWithTag("Player");
-            if (p != null) _player = p.transform;
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-            if (IsDead || _player == null) return;
-            if (_status != null && _status.IsStunned) { Stop(); return; }
-
-            if (_isSummoning) return; // во время каста стоит на месте (корутина)
-
-            float dist = Vector2.Distance(transform.position, _player.position);
-            float speedMul = _status != null ? _status.SpeedMultiplier : 1f;
-            Vector2 toPlayer = ((Vector2)_player.position - (Vector2)transform.position).normalized;
-
             _summonTimer -= Time.deltaTime;
-            if (_summonTimer <= 0f && dist <= detectionRange)
+            if (_summonTimer <= 0f && DistanceToPlayer <= detectionRange)
             {
                 StartCoroutine(SummonRoutine());
                 return;
             }
 
-            if (dist > detectionRange) { Stop(); return; }
-
-            // Держим дистанцию.
-            if (dist < keepDistance)
-            {
-                Rb.linearVelocity = -toPlayer * moveSpeed * speedMul;
-                SetMoving(-toPlayer);
-            }
-            else { Stop(); }
-            SetDirection(toPlayer);
+            // Держим дистанцию: слишком близко — отступаем, иначе стоим.
+            float dist  = DistanceToPlayer;
+            Vector2 toP = DirToPlayer;
+            if (dist < keepDistance) MoveInDirection(-toP, moveSpeed * SpeedMul);
+            else                     StopMoving();
+            FaceDirection(toP);
         }
+
+        // Призыв ведёт корутина; обработчик Special — пустой (стоим на месте).
+        protected override void OnSpecial() { }
 
         System.Collections.IEnumerator SummonRoutine()
         {
             _isSummoning = true;
             _summonTimer = summonCooldown;
-            Stop();
+            LockState    = true;
+            SetState(EnemyState.Special);
+            StopMoving();
 
-            // Уязвим во время призыва.
+            // Уязвим во время каста.
             yield return new WaitForSeconds(summonCastTime);
 
             if (!IsDead && minionPrefab != null)
@@ -90,6 +73,8 @@ namespace Enemy
                 }
 
             _isSummoning = false;
+            LockState    = false;
+            SetState(EnemyState.Chase);
         }
 
         // Уязвимость в момент призыва (ТЗ §4): умножаем входящий урон.
@@ -97,12 +82,6 @@ namespace Enemy
         {
             if (_isSummoning) amount *= vulnerabilityMultiplier;
             base.TakeDamage(amount, type);
-        }
-
-        void Stop()
-        {
-            Rb.linearVelocity = Vector2.zero;
-            SetMoving(Vector2.zero);
         }
     }
 }

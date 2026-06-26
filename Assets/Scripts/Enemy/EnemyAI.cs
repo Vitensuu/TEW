@@ -4,76 +4,35 @@ using Game.Dungeon;
 
 namespace Enemy
 {
-    public class EnemyAI : EnemyBase
+    /// <summary>
+    /// Ближний враг на единой FSM (<see cref="StateMachineEnemy"/>):
+    /// Idle → Chase (A* по NavGrid) → Attack. Поведение идентично прежней версии,
+    /// переходы выражены через канонические состояния.
+    /// </summary>
+    public class EnemyAI : StateMachineEnemy
     {
-        [Header("AI")]
-        [SerializeField] float moveSpeed       = 2.5f;
-        [SerializeField] float detectionRange  = 7f;
-        [SerializeField] float pathRefreshRate = 0.4f;
+        [Header("A* погоня")]
+        [SerializeField] float pathRefreshRate  = 0.1f;
         [SerializeField] float waypointReachDist = 0.25f;
 
-        enum State { Idle, Chase, Attack }
-
-        State                _state;
-        Transform            _player;
-        List<Vector2Int>     _path    = new List<Vector2Int>();
-        int                  _pathIdx;
-        float                _pathTimer;
-        Game.Combat.StatusEffectHandler _status;
-
-        protected override void Awake()
-        {
-            base.Awake();
-            _status = GetComponent<Game.Combat.StatusEffectHandler>();
-        }
-
-        void Start()
-        {
-            var playerGO = GameObject.FindGameObjectWithTag("Player");
-            if (playerGO != null) _player = playerGO.transform;
-        }
+        List<Vector2Int> _path = new List<Vector2Int>();
+        int   _pathIdx;
+        float _pathTimer;
 
         NavGrid Nav => RoomManager.Instance != null ? RoomManager.Instance.Nav : null;
 
-        protected override void Update()
+        protected override EnemyState DecideState(float dist)
+            => dist <= attackRange    ? EnemyState.Attack
+             : dist <= detectionRange ? EnemyState.Chase
+             :                          EnemyState.Idle;
+
+        protected override void OnIdle()
         {
-            base.Update();
-            if (IsDead || _player == null) return;
-
-            // Stun (ТЗ §4): полная остановка, не двигаемся и не атакуем.
-            if (_status != null && _status.IsStunned)
-            {
-                Rb.linearVelocity = Vector2.zero;
-                SetMoving(Vector2.zero);
-                return;
-            }
-
-            float dist = Vector2.Distance(transform.position, _player.position);
-
-            _state = dist <= attackRange   ? State.Attack
-                   : dist <= detectionRange ? State.Chase
-                   : State.Idle;
-
-            switch (_state)
-            {
-                case State.Idle:   DoIdle();   break;
-                case State.Chase:  DoChase();  break;
-                case State.Attack: DoAttack(); break;
-            }
-        }
-
-        // ── Idle ──────────────────────────────────────────────────────────────
-
-        void DoIdle()
-        {
-            Rb.linearVelocity = Vector2.zero;
-            SetMoving(Vector2.zero);
+            StopMoving();
             _path.Clear();
         }
 
-        // ── Chase ─────────────────────────────────────────────────────────────
-
-        void DoChase()
+        protected override void OnChase()
         {
             _pathTimer -= Time.deltaTime;
             if (_pathTimer <= 0f || _path.Count == 0)
@@ -81,18 +40,24 @@ namespace Enemy
                 _pathTimer = pathRefreshRate;
                 RefreshPath();
             }
-
             MoveAlongPath();
         }
 
+        protected override void OnAttack()
+        {
+            StopMoving();
+            FaceDirection(DirToPlayer);
+            PerformAttack(Player);
+        }
+
+        // ── A* ──────────────────────────────────────────────────────────────────
         void RefreshPath()
         {
             var nav = Nav;
-            if (nav == null || _player == null) return;
+            if (nav == null || Player == null) return;
 
-            // Конвертируем world → grid cell (NavGrid строится из реальной геометрии комнат)
             Vector2Int fromCell = nav.WorldToCell(transform.position);
-            Vector2Int toCell   = nav.WorldToCell(_player.position);
+            Vector2Int toCell   = nav.WorldToCell(Player.position);
 
             _path    = GridPathfinder.FindPath(nav, fromCell, toCell);
             _pathIdx = 0;
@@ -100,33 +65,14 @@ namespace Enemy
 
         void MoveAlongPath()
         {
-            if (_path == null || _pathIdx >= _path.Count)
-            {
-                Rb.linearVelocity = Vector2.zero;
-                SetMoving(Vector2.zero);
-                return;
-            }
+            if (_path == null || _pathIdx >= _path.Count) { StopMoving(); return; }
 
             Vector3 target = Nav != null ? Nav.CellToWorldCenter(_path[_pathIdx]) : transform.position;
             Vector2 dir    = (target - transform.position).normalized;
-            float speedMul = _status != null ? _status.SpeedMultiplier : 1f; // Freeze (ТЗ §4)
-            Rb.linearVelocity = dir * moveSpeed * speedMul;
-            SetMoving(dir);
+            MoveInDirection(dir, moveSpeed * SpeedMul);
 
             if (Vector2.Distance(transform.position, target) < waypointReachDist)
                 _pathIdx++;
-        }
-
-        // ── Attack ────────────────────────────────────────────────────────────
-
-        void DoAttack()
-        {
-            Rb.linearVelocity = Vector2.zero;
-            SetMoving(Vector2.zero);
-            // Смотрим в сторону игрока во время атаки
-            Vector2 toPlayer = (_player.position - transform.position).normalized;
-            SetDirection(toPlayer);
-            PerformAttack(_player);
         }
 
         void OnDrawGizmosSelected()

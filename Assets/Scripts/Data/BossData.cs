@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Game.Core;
 
 namespace Game.Data
 {
@@ -25,6 +26,21 @@ namespace Game.Data
         public bool summonsMinions;
         public EnemyData minionToSummon;
         public int minionsPerSummon = 2;
+
+        [Header("Живая комната / связи (Фаза 7)")]
+        [Tooltip("Siege: периодически возводит TempWall у игрока (перестройка арены)")]
+        public bool buildWalls;
+        public float wallInterval = 5f;
+        [Tooltip("Периодически бросает HazardZone у игрока (гравитация/Void/бездна)")]
+        public bool hazardField;
+        public float hazardInterval = 3.5f;
+        public DamageType hazardType = DamageType.Magic;
+        [Tooltip("Link-gated: связи с призванными миньонами снижают урон боссу, пока целы")]
+        public bool linkToMinions;
+        [Range(0f, 1f)] public float linkedDamageTaken = 0.3f;
+        [Tooltip("Свёртка/зеркало: отражает долю получаемого урона обратно игроку")]
+        public bool mirrorDamage;
+        [Range(0f, 1f)] public float mirrorFraction = 0.3f;
     }
 
     /// <summary>

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Game.Core;
 using Game.Data;
+using Enemy;
 
 namespace Game.Dungeon
 {
@@ -21,6 +22,7 @@ namespace Game.Dungeon
 
         bool _started, _cleared;
         readonly List<GameObject> _enemies = new List<GameObject>();
+        EncounterDirector _director;
 
         public bool Cleared => _cleared;
         public System.Action<RoomEncounter> OnCleared;
@@ -59,19 +61,51 @@ namespace Game.Dungeon
             _enemies.Clear();
             _enemies.AddRange(_populator.PopulateRoom(_room, _cfg, _floor));
 
-            if (_enemies.Count == 0) Clear();      // пустая комната — сразу зачищена
+            if (_enemies.Count == 0) { Clear(); return; }   // пустая комната — сразу зачищена
+
+            // Синергии групп (Фаза 4): директор сканирует роли и включает тактику.
+            _director = gameObject.GetComponent<EncounterDirector>()
+                        ?? gameObject.AddComponent<EncounterDirector>();
+            _director.Begin(_enemies);
         }
 
         void Update()
         {
             if (!_started || _cleared) return;
-            _enemies.RemoveAll(e => e == null);    // мёртвые враги уничтожаются
-            if (_enemies.Count == 0) Clear();
+            _enemies.RemoveAll(IsGone);            // убираем уничтоженных и мёртвых
+
+            if (_enemies.Count == 0)
+            {
+                // Подбираем «отставших» — миньонов призывателя и копии деления,
+                // которых нет в исходном списке (Фаза 6).
+                RescanStragglers();
+                if (_enemies.Count == 0) Clear();
+            }
+        }
+
+        static bool IsGone(GameObject go)
+        {
+            if (go == null) return true;
+            var eb = go.GetComponent<EnemyBase>();
+            return eb != null && eb.Dead;
+        }
+
+        void RescanStragglers()
+        {
+            Bounds b = _room.WorldBounds;
+            var hits = Physics2D.OverlapBoxAll(b.center, b.size, 0f);
+            foreach (var h in hits)
+            {
+                var eb = h.GetComponentInParent<EnemyBase>();
+                if (eb == null || !eb.IsAlive) continue;
+                if (!_enemies.Contains(eb.gameObject)) _enemies.Add(eb.gameObject);
+            }
         }
 
         void Clear()
         {
             _cleared = true;
+            if (_director != null) _director.End();
             if (_room.Node != null) _room.Node.Cleared = true;
 
             OpenDoors();        // ТЗ: двери открываются

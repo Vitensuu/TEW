@@ -2,6 +2,7 @@ using UnityEngine;
 using Game.Combat;
 using Game.Core;
 using Game.Data;
+using Game.Dungeon;
 using Game.Items;
 
 namespace Enemy
@@ -28,6 +29,12 @@ namespace Enemy
         BossPhase _phase;
         float _attackTimer;
 
+        // Фаза 7: связи с миньонами (link-gated), таймеры живой комнаты.
+        readonly System.Collections.Generic.List<CorruptionLink> _links
+            = new System.Collections.Generic.List<CorruptionLink>();
+        float _linkDamageMult = 1f;
+        float _wallTimer, _hazardTimer;
+
         protected override void Awake()
         {
             base.Awake();
@@ -46,6 +53,17 @@ namespace Enemy
             var p = GameObject.FindGameObjectWithTag("Player");
             if (p != null) _player = p.transform;
 
+            // Фаза 7: фильтр входящего урона — зеркало (свёртка) + link-gated защита.
+            IncomingDamageFilter = (amt, type) =>
+            {
+                if (_phase != null && _phase.mirrorDamage && _player != null)
+                {
+                    var ph = _player.GetComponent<PlayerHealth>();
+                    if (ph != null && ph.IsAlive) ph.TakeDamage(amt * _phase.mirrorFraction);
+                }
+                return amt * _linkDamageMult;
+            };
+
             if (_boss != null && _boss.bossMusic != null && Game.Audio.AudioManager.Instance != null)
                 Game.Audio.AudioManager.Instance.PlayMusic(_boss.bossMusic);
 
@@ -60,6 +78,9 @@ namespace Enemy
 
             EnterPhaseForHealth();
             if (_phase == null) return;
+
+            UpdateLinkGate();      // Фаза 7: пока связи с миньонами целы — урон боссу снижен
+            UpdateRoomTactics();   // Фаза 7: стены/опасные зоны живой комнаты
 
             float speedMul = _status != null ? _status.SpeedMultiplier : 1f;
             Vector2 toPlayer = ((Vector2)_player.position - (Vector2)transform.position).normalized;
@@ -110,10 +131,22 @@ namespace Enemy
             {
                 for (int i = 0; i < _phase.minionsPerSummon; i++)
                 {
-                    if (_phase.minionToSummon.spritePrefab == null) break;
+                    var prefab = _phase.minionToSummon.spritePrefab;
+                    if (prefab == null) break;
                     Vector2 off = Random.insideUnitCircle * 2f;
-                    Instantiate(_phase.minionToSummon.spritePrefab,
-                        transform.position + (Vector3)off, Quaternion.identity);
+                    var minion = Instantiate(prefab, transform.position + (Vector3)off, Quaternion.identity);
+
+                    // Link-gated (Фаза 7): босс тянет связь к миньону (лечит его), а сам
+                    // получает меньше урона, пока связь цела. Игрок рвёт связь/убивает миньона.
+                    if (_phase.linkToMinions)
+                    {
+                        var meb = minion.GetComponent<EnemyBase>();
+                        if (meb != null)
+                        {
+                            var link = CorruptionLink.Create(this, meb, healPerSecond: 3f);
+                            if (link != null) _links.Add(link);
+                        }
+                    }
                 }
             }
 
@@ -132,8 +165,52 @@ namespace Enemy
             }
         }
 
+        // ── Фаза 7: живая комната и link-gated защита ───────────────────────────
+        void UpdateLinkGate()
+        {
+            if (_phase == null || !_phase.linkToMinions) { _linkDamageMult = 1f; return; }
+            int alive = 0;
+            for (int i = _links.Count - 1; i >= 0; i--)
+            {
+                if (_links[i] == null || !_links[i].Alive) { _links.RemoveAt(i); continue; }
+                alive++;
+            }
+            _linkDamageMult = alive > 0 ? _phase.linkedDamageTaken : 1f;
+        }
+
+        void UpdateRoomTactics()
+        {
+            if (_phase == null || _player == null) return;
+
+            if (_phase.buildWalls)
+            {
+                _wallTimer -= Time.deltaTime;
+                if (_wallTimer <= 0f)
+                {
+                    _wallTimer = _phase.wallInterval;
+                    Vector2 d = Random.insideUnitCircle.normalized;
+                    if (d == Vector2.zero) d = Vector2.right;
+                    TempWall.Spawn(_player.position + (Vector3)(d * 2.5f), new Vector2(4f, 0.6f), 4f);
+                }
+            }
+
+            if (_phase.hazardField)
+            {
+                _hazardTimer -= Time.deltaTime;
+                if (_hazardTimer <= 0f)
+                {
+                    _hazardTimer = _phase.hazardInterval;
+                    HazardZone.SpawnCircle(_player.position + (Vector3)(Random.insideUnitCircle * 2f),
+                        1.6f, 3f, 4f, _phase.hazardType, startDelay: 0.4f);
+                }
+            }
+        }
+
         protected override void Die()
         {
+            foreach (var l in _links) if (l != null) l.Break();
+            _links.Clear();
+
             OnBossDefeated?.Invoke();
             EventBus.TriggerFloorComplete(GameManager.Instance != null
                 ? GameManager.Instance.Run?.currentFloor ?? 0 : 0);

@@ -15,7 +15,13 @@ MonoBehaviour:
   floorNumber: 1
   minRooms: 3
   maxRooms: 5
-  enemyPool: []
+  enemyPool:
+  - {fileID: 11400000, guid: 16b654514e69948589f9636f00ec1f2e, type: 2}
+  - {fileID: 11400000, guid: 54c7f93bbf3554972b04351c47b70386, type: 2}
+  - {fileID: 11400000, guid: eb4ed4f4cea1e415f82c22202057ab46, type: 2}
+  - {fileID: 11400000, guid: 6ac9d51e4c532421ab12d8cdccaf5de9, type: 2}
+  - {fileID: 11400000, guid: 4d140f0ad0851408fb206b3561c84389, type: 2}
+  - {fileID: 11400000, guid: 0c79d5fb8d5f14ba29dedf95c19d4971, type: 2}
   minEnemiesPerRoom: 2
   maxEnemiesPerRoom: 4
   hasBoss: 0

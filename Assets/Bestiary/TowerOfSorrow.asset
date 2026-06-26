@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e64eee7a8492400aa0d13d1751829c4, type: 3}
+  m_Name: TowerOfSorrow
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Data.EnemyData
+  enemyName: "\u0411\u0430\u0448\u043D\u044F \u0421\u043A\u043E\u0440\u0431\u0438"
+  maxHealth: 140
+  damage: 10
+  speed: 0.8
+  detectionRange: 100
+  attackRange: 0.9
+  attackCooldown: 1.2
+  behaviorType: 0
+  roles: 770
+  expReward: 21
+  goldReward: 14
+  lootTable: []
+  spritePrefab: {fileID: 7897005316184410403, guid: 5bb2280e5b0134c2198ebe0d0fd88729, type: 3}

@@ -28,6 +28,10 @@ namespace Game.Dungeon
         [SerializeField] string wallTilemapNameHint = "Wall";
         [SerializeField] string floorTilemapNameHint = "Floor";
         [SerializeField] string obstacleLayerName = "Obstacle";
+        [Tooltip("Ширина прохода (зазор в BoxCollider2D-стене у каждой точки соединения)")]
+        [SerializeField] float doorGapWidth = 3f;
+        [Tooltip("Толщина граничного коллайдера стен")]
+        [SerializeField] float wallThickness = 0.5f;
 
         [Header("Габариты (если нет тайлмапа пола)")]
         public Vector2 footprint = new Vector2(16, 12);
@@ -67,34 +71,26 @@ namespace Game.Dungeon
         // ── Авто-конфиг визуального префаба ──────────────────────────────────────
         void AutoConfigure()
         {
+            // 1. Найти тайлмап пола для вычисления габаритов.
             var tilemaps = GetComponentsInChildren<Tilemap>(true);
-            Tilemap wall = null, floor = null;
+            Tilemap floor = null;
             foreach (var tm in tilemaps)
             {
-                if (wall == null && tm.name.ToLower().Contains(wallTilemapNameHint.ToLower())) wall = tm;
-                if (floor == null && tm.name.ToLower().Contains(floorTilemapNameHint.ToLower())) floor = tm;
+                if (floor == null && tm.name.ToLower().Contains(floorTilemapNameHint.ToLower()))
+                    floor = tm;
             }
-            if (wall == null && tilemaps.Length > 0) wall = tilemaps[0];
-            if (floor == null && tilemaps.Length > 1) floor = tilemaps[1];
-
-            // 1. Коллайдер стен → слой препятствий (для физики и NavGrid).
-            //    Простой TilemapCollider2D достаточен и не требует Rigidbody2D/Composite.
-            if (wall != null)
+            if (floor == null)
             {
-                if (!wall.TryGetComponent<TilemapCollider2D>(out _))
-                    wall.gameObject.AddComponent<TilemapCollider2D>();
-
-                int layer = LayerMask.NameToLayer(obstacleLayerName);
-                if (layer >= 0) wall.gameObject.layer = layer;
+                if (tilemaps.Length > 1)       floor = tilemaps[1];
+                else if (tilemaps.Length == 1) floor = tilemaps[0];
             }
 
             // 2. Габариты и центр — по тайлмапу пола.
-            Tilemap sizeSource = floor != null ? floor : wall;
-            if (sizeSource != null && boundsBox == null)
+            if (floor != null && boundsBox == null)
             {
-                sizeSource.CompressBounds();
-                Bounds lb = sizeSource.localBounds;
-                Vector3 worldCenter = sizeSource.transform.TransformPoint(lb.center);
+                floor.CompressBounds();
+                Bounds lb = floor.localBounds;
+                Vector3 worldCenter = floor.transform.TransformPoint(lb.center);
                 _localCenter = transform.InverseTransformPoint(worldCenter);
                 footprint = new Vector2(Mathf.Abs(lb.size.x), Mathf.Abs(lb.size.y));
             }
@@ -102,6 +98,11 @@ namespace Game.Dungeon
             // 3. Авто-точки стыковки по центрам сторон, если их нет.
             if (GetComponentsInChildren<RoomConnectionPoint>(true).Length == 0)
                 GenerateConnectionPoints();
+
+            // 4. BoxCollider2D периметр с зазорами для проходов вместо TilemapCollider2D.
+            //    Так проходы остаются открытыми независимо от тайлмапа стен.
+            if (transform.Find("BoundaryWalls") == null)
+                GenerateBoundaryColliders();
         }
 
         void GenerateConnectionPoints()
@@ -123,6 +124,94 @@ namespace Game.Dungeon
             go.transform.SetParent(parent, false);
             go.transform.localPosition = localPos;
             go.AddComponent<RoomConnectionPoint>().direction = dir;
+        }
+
+        void GenerateBoundaryColliders()
+        {
+            float hx = footprint.x * 0.5f;
+            float hy = footprint.y * 0.5f;
+            float dh = doorGapWidth * 0.5f;
+            int layer = LayerMask.NameToLayer(obstacleLayerName);
+
+            var holder = new GameObject("BoundaryWalls").transform;
+            holder.SetParent(transform, false);
+
+            var conns = GetComponentsInChildren<RoomConnectionPoint>(true);
+            bool hasN = false, hasS = false, hasE = false, hasW = false;
+            foreach (var c in conns)
+            {
+                if      (c.direction == Direction.North) hasN = true;
+                else if (c.direction == Direction.South) hasS = true;
+                else if (c.direction == Direction.East)  hasE = true;
+                else if (c.direction == Direction.West)  hasW = true;
+            }
+
+            AddSideBoxes(holder, _localCenter + new Vector3(0,  hy, 0), true,  hx, dh, layer, hasN);
+            AddSideBoxes(holder, _localCenter + new Vector3(0, -hy, 0), true,  hx, dh, layer, hasS);
+            AddSideBoxes(holder, _localCenter + new Vector3( hx, 0, 0), false, hy, dh, layer, hasE);
+            AddSideBoxes(holder, _localCenter + new Vector3(-hx, 0, 0), false, hy, dh, layer, hasW);
+        }
+
+        // Добавляет 1 или 2 BoxCollider2D для одной стороны периметра.
+        // horizontal=true → стена горизонтальная (N/S), halfLen = hx.
+        // hasDoor=true → разбиваем на 2 сегмента с зазором doorHW×2 по центру.
+        void AddSideBoxes(Transform parent, Vector3 wallLocal, bool horizontal,
+                          float halfLen, float doorHW, int layer, bool hasDoor)
+        {
+            if (!hasDoor)
+            {
+                var sz = horizontal ? new Vector2(halfLen * 2, wallThickness)
+                                    : new Vector2(wallThickness, halfLen * 2);
+                CreateWallBox(parent, wallLocal, sz, layer);
+                return;
+            }
+            float segLen = halfLen - doorHW;
+            if (segLen <= 0.02f) return;
+            float offset = (halfLen + doorHW) * 0.5f;
+            var segSz = horizontal ? new Vector2(segLen, wallThickness)
+                                   : new Vector2(wallThickness, segLen);
+            var shift = horizontal ? new Vector3(offset, 0, 0) : new Vector3(0, offset, 0);
+            CreateWallBox(parent, wallLocal - shift, segSz, layer);
+            CreateWallBox(parent, wallLocal + shift, segSz, layer);
+        }
+
+        void CreateWallBox(Transform parent, Vector3 localPos, Vector2 size, int layer)
+        {
+            var go = new GameObject("WallSeg");
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = localPos;
+            if (layer >= 0) go.layer = layer;
+            var col = go.AddComponent<BoxCollider2D>();
+            col.size = size;
+        }
+
+        /// <summary>
+        /// Закрыть зазор для неиспользованного прохода в указанном локальном направлении.
+        /// Вызывается ассемблером после финальной сборки этажа.
+        /// </summary>
+        public void SealDoor(Direction localDir)
+        {
+            float hx = footprint.x * 0.5f, hy = footprint.y * 0.5f;
+            float dh = doorGapWidth * 0.5f;
+            int layer = LayerMask.NameToLayer(obstacleLayerName);
+
+            bool horizontal = (localDir == Direction.North || localDir == Direction.South);
+            float axisOff = (localDir == Direction.North || localDir == Direction.East) ? 1f : -1f;
+            Vector3 wallCenter = horizontal
+                ? _localCenter + new Vector3(0, axisOff * hy, 0)
+                : _localCenter + new Vector3(axisOff * hx, 0, 0);
+            Vector2 sealSz = horizontal
+                ? new Vector2(doorGapWidth, wallThickness)
+                : new Vector2(wallThickness, doorGapWidth);
+
+            var holder = transform.Find("BoundaryWalls");
+            if (holder == null)
+            {
+                var h = new GameObject("BoundaryWalls");
+                h.transform.SetParent(transform, false);
+                holder = h.transform;
+            }
+            CreateWallBox(holder, wallCenter, sealSz, layer);
         }
 
         // ── Сбор дочерних элементов ──────────────────────────────────────────────
@@ -199,5 +288,6 @@ namespace Game.Dungeon
             var b = WorldBounds;
             Gizmos.DrawWireCube(b.center, b.size);
         }
+
     }
 }
