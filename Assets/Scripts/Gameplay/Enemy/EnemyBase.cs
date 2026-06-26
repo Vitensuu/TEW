@@ -49,6 +49,10 @@ namespace Enemy
         protected bool           IsDead;
         protected float          AttackTimer;
 
+        [Tooltip("Sorting Order спрайта врага. Должен быть выше декора комнаты (1–3), " +
+                 "иначе враг рендерится ПОД ассетами комнаты и не виден.")]
+        [SerializeField] protected int spriteSortingOrder = 6;
+
         protected Rigidbody2D    Rb;
         protected Animator       Anim;
         protected SpriteRenderer Sr;
@@ -83,6 +87,10 @@ namespace Enemy
             Rb   = GetComponent<Rigidbody2D>();
             Anim = GetComponent<Animator>();
             Sr   = GetComponent<SpriteRenderer>();
+
+            // Без этого враг рендерится под спрайтами комнаты (декор имеет order 1–3)
+            // и его не видно — он бьёт игрока «из-под пола».
+            if (Sr != null) Sr.sortingOrder = spriteSortingOrder;
 
             Rb.gravityScale = 0f;
             Rb.constraints  = RigidbodyConstraints2D.FreezeRotation;
