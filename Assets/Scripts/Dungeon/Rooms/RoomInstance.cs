@@ -24,8 +24,7 @@ namespace Game.Dungeon
 
         [Header("Авто-конфигурация визуального префаба")]
         [SerializeField] bool autoConfigure = true;
-        [Tooltip("Имя тайлмапа со стенами (по подстроке имени объекта)")]
-        [SerializeField] string wallTilemapNameHint = "Wall";
+        [Tooltip("Имя тайлмапа пола (по подстроке имени объекта)")]
         [SerializeField] string floorTilemapNameHint = "Floor";
         [SerializeField] string obstacleLayerName = "Obstacle";
         [Tooltip("Ширина прохода (зазор в BoxCollider2D-стене у каждой точки соединения)")]
