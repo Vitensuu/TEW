@@ -16,7 +16,7 @@ namespace Game.Dungeon
     public class DungeonAssembler : MonoBehaviour
     {
         [Header("Библиотека и конфиги")]
-        [SerializeField] RoomLibrary library;
+        [SerializeField] RoomRegistry library;
         [Tooltip("Конфиги этажей по индексу (этаж 1 = element 0). Если пусто/коротко — берётся последний.")]
         [SerializeField] List<FloorConfig> floorConfigs = new List<FloorConfig>();
 
@@ -205,13 +205,13 @@ namespace Game.Dungeon
                 var candidate = InstantiateRoom(rd);
 
                 // Перебираем свободные сокеты родителя в случайном порядке.
-                foreach (var ps in Shuffled(new List<RoomConnectionPoint>(parent.FreeConnections())))
+                foreach (var ps in Shuffled(new List<RoomConnection>(parent.FreeConnections())))
                 {
                     Direction worldDir = ps.WorldDirection(parent.RotationStepsCW);
                     Direction needChildDir = worldDir.Opposite();
 
                     // Сортируем: сначала точки с 0 шагами (без вращения), потом остальные.
-                    var connsSorted = new List<RoomConnectionPoint>(candidate.FreeConnections());
+                    var connsSorted = new List<RoomConnection>(candidate.FreeConnections());
                     bool canRot = candidate.data != null && candidate.data.canRotate;
                     connsSorted.Sort((a, b) =>
                     {

@@ -40,7 +40,7 @@ namespace Game.Dungeon
         Vector3 _localCenter;
 
         // ── Собранные дочерние элементы ─────────────────────────────────────────
-        public readonly List<RoomConnectionPoint> Connections = new List<RoomConnectionPoint>();
+        public readonly List<RoomConnection> Connections = new List<RoomConnection>();
         public readonly List<DoorController> Doors = new List<DoorController>();
         public readonly List<SpawnPoint> EnemyPoints = new List<SpawnPoint>();
         public readonly List<SpawnPoint> ChestPoints = new List<SpawnPoint>();
@@ -95,7 +95,7 @@ namespace Game.Dungeon
             }
 
             // 3. Авто-точки стыковки по центрам сторон, если их нет.
-            if (GetComponentsInChildren<RoomConnectionPoint>(true).Length == 0)
+            if (GetComponentsInChildren<RoomConnection>(true).Length == 0)
                 GenerateConnectionPoints();
 
             // 4. BoxCollider2D периметр с зазорами для проходов вместо TilemapCollider2D.
@@ -122,7 +122,7 @@ namespace Game.Dungeon
             var go = new GameObject(n);
             go.transform.SetParent(parent, false);
             go.transform.localPosition = localPos;
-            go.AddComponent<RoomConnectionPoint>().direction = dir;
+            go.AddComponent<RoomConnection>().direction = dir;
         }
 
         void GenerateBoundaryColliders()
@@ -135,7 +135,7 @@ namespace Game.Dungeon
             var holder = new GameObject("BoundaryWalls").transform;
             holder.SetParent(transform, false);
 
-            var conns = GetComponentsInChildren<RoomConnectionPoint>(true);
+            var conns = GetComponentsInChildren<RoomConnection>(true);
             bool hasN = false, hasS = false, hasE = false, hasW = false;
             foreach (var c in conns)
             {
@@ -241,12 +241,12 @@ namespace Game.Dungeon
             }
         }
 
-        public IEnumerable<RoomConnectionPoint> FreeConnections()
+        public IEnumerable<RoomConnection> FreeConnections()
         {
             foreach (var c in Connections) if (!c.used) yield return c;
         }
 
-        public RoomConnectionPoint FreeConnectionFacing(Direction dir)
+        public RoomConnection FreeConnectionFacing(Direction dir)
         {
             foreach (var c in Connections)
                 if (!c.used && c.WorldDirection(RotationStepsCW) == dir) return c;

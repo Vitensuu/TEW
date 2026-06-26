@@ -4,13 +4,13 @@ using UnityEngine;
 namespace Game.Dungeon
 {
     /// <summary>
-    /// Библиотека всех готовых комнат (ТЗ ЭТАП 1 + «RoomLibrary»).
+    /// Реестр всех готовых комнат (ТЗ §2 — RoomRegistry; бывш. RoomLibrary).
     /// SO-ассет: дизайнер кладёт сюда все RoomData. Ассемблер запрашивает
     /// подходящий префаб по типу/этажу с учётом веса и БЕЗ повтора подряд
     /// (ТЗ ЭТАП 3 — «избегать повторения одинаковых комнат подряд»).
     /// </summary>
-    [CreateAssetMenu(menuName = "TEW/Rooms/RoomLibrary", fileName = "RoomLibrary")]
-    public class RoomLibrary : ScriptableObject
+    [CreateAssetMenu(menuName = "TEW/Rooms/RoomRegistry", fileName = "RoomRegistry")]
+    public class RoomRegistry : ScriptableObject
     {
         [SerializeField] List<RoomData> rooms = new List<RoomData>();
 

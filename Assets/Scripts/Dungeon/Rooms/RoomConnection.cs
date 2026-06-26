@@ -3,13 +3,13 @@ using UnityEngine;
 namespace Game.Dungeon
 {
     /// <summary>
-    /// Точка стыковки комнаты — «дверной сокет» (ТЗ ЭТАП 4 — RoomConnectionPoint).
+    /// Точка стыковки комнаты — «дверной сокет» (ТЗ ЭТАП 4 — RoomConnection).
     /// Дизайнер ставит её на дочерний трансформ у каждого прохода комнаты-префаба.
     /// direction задаёт, в какую сторону смотрит проход ОТНОСИТЕЛЬНО комнаты
     /// (до вращения). Ассемблер вращает комнату так, чтобы её свободный сокет
     /// смотрел в сторону, противоположную сокету родителя.
     /// </summary>
-    public class RoomConnectionPoint : MonoBehaviour
+    public class RoomConnection : MonoBehaviour
     {
         [Tooltip("Сторона комнаты, куда смотрит этот проход (локально)")]
         public Direction direction = Direction.North;

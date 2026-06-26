@@ -73,10 +73,10 @@ namespace Game.DungeonEditor
             }
 
             // 3. RoomLibrary.
-            var lib = AssetDatabase.LoadAssetAtPath<RoomLibrary>(LibraryPath);
+            var lib = AssetDatabase.LoadAssetAtPath<RoomRegistry>(LibraryPath);
             if (lib == null)
             {
-                lib = ScriptableObject.CreateInstance<RoomLibrary>();
+                lib = ScriptableObject.CreateInstance<RoomRegistry>();
                 AssetDatabase.CreateAsset(lib, LibraryPath);
             }
             var so = new SerializedObject(lib);
@@ -111,12 +111,12 @@ namespace Game.DungeonEditor
         {
             // Гарантируем, что библиотека и слой готовы (запускаем Setup при необходимости).
             EnsureLayer(ObstacleLayer);
-            var lib = AssetDatabase.LoadAssetAtPath<RoomLibrary>(LibraryPath);
+            var lib = AssetDatabase.LoadAssetAtPath<RoomRegistry>(LibraryPath);
             if (lib == null)
             {
                 Debug.Log("[RoomSetupTool] RoomLibrary не найдена — запускаю Setup из maps/.");
                 Setup();
-                lib = AssetDatabase.LoadAssetAtPath<RoomLibrary>(LibraryPath);
+                lib = AssetDatabase.LoadAssetAtPath<RoomRegistry>(LibraryPath);
                 if (lib == null) { Debug.LogError("[RoomSetupTool] Нет RoomLibrary. Прерываю."); return; }
             }
 
