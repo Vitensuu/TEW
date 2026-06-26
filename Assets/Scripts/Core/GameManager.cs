@@ -4,9 +4,9 @@ using Game.Save;
 namespace Game.Core
 {
     /// <summary>
-    /// Состояние игры (ТЗ §5 — GameManager FSM: Menu/Run/Pause/Dead).
+    /// Единое состояние игры (ТЗ §8 — GameState FSM).
     /// </summary>
-    public enum GameState { Boot, Menu, CharacterSelect, Run, Pause, Dead }
+    public enum GameState { MainMenu, CharacterSelect, Loading, Playing, Paused, GameOver }
 
     /// <summary>
     /// Центральный менеджер состояния (ТЗ §5 — GameManager, Singleton).
@@ -18,7 +18,7 @@ namespace Game.Core
         [Header("Текущий забег (runtime)")]
         [SerializeField] Data.PlayerRunData runData;
 
-        public GameState State { get; private set; } = GameState.Boot;
+        public GameState State { get; private set; } = GameState.MainMenu;
         public Data.PlayerRunData Run => runData;
 
         public System.Action<GameState> OnStateChanged;
@@ -43,15 +43,18 @@ namespace Game.Core
         {
             if (State == next) return;
             State = next;
-            Time.timeScale = next == GameState.Pause ? 0f : 1f;
+            Time.timeScale = next == GameState.Paused ? 0f : 1f;
             OnStateChanged?.Invoke(next);
         }
 
         public void TogglePause()
         {
-            if (State == GameState.Run)        SetState(GameState.Pause);
-            else if (State == GameState.Pause) SetState(GameState.Run);
+            if (State == GameState.Playing)      SetState(GameState.Paused);
+            else if (State == GameState.Paused)  SetState(GameState.Playing);
         }
+
+        /// <summary>Вызывается SceneBootstrap'ом, когда игровая сцена готова.</summary>
+        public void MarkPlaying() => SetState(GameState.Playing);
 
         // ── Жизненный цикл забега ───────────────────────────────────────────────
 
@@ -59,8 +62,9 @@ namespace Game.Core
         public void StartNewRun(Data.CharacterData character)
         {
             runData = Data.PlayerRunData.CreateForCharacter(character);
-            SetState(GameState.Run);
+            SetState(GameState.Loading);
             SceneLoader.Load(SceneLoader.GameScene);
+            // В Playing переходит SceneBootstrap игровой сцены (через MarkPlaying).
         }
 
         void HandleFloorComplete(int floor)
@@ -70,7 +74,7 @@ namespace Game.Core
 
         void HandlePlayerDeath()
         {
-            SetState(GameState.Dead);
+            SetState(GameState.GameOver);
             // Начисляем заработанные Осколки душ в мета-сейв (ТЗ §4 «Мета-прогрессия»).
             if (runData != null && SaveSystem.Instance != null)
                 SaveSystem.Instance.AddSoulShards(runData.SoulShardsEarned());

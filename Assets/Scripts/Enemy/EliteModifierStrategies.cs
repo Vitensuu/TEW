@@ -28,7 +28,7 @@ namespace Enemy
         protected Transform Player()
         {
             if (sm != null && sm.Target != null) return sm.Target;
-            var p = GameObject.FindGameObjectWithTag("Player");
+            var p = Game.Core.PlayerRef.Resolve();
             return p != null ? p.transform : null;
         }
     }

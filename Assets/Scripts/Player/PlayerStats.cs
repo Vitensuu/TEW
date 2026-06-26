@@ -23,7 +23,13 @@ namespace Game.Player
         PlayerRunData Run =>
             GameManager.Instance != null ? GameManager.Instance.Run : null;
 
-        void Awake() => Recompute();
+        void Awake()
+        {
+            ServiceLocator.Register(this); // ТЗ §6 — развязка вместо FindObjectOfType
+            Recompute();
+        }
+
+        void OnDestroy() => ServiceLocator.Unregister(this);
 
         /// <summary>Пересчитать итоговые характеристики из всех источников.</summary>
         public void Recompute()

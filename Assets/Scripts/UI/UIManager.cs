@@ -42,8 +42,8 @@ namespace Game.UI
 
         void HandleState(GameState state)
         {
-            if (pausePanel != null) pausePanel.SetActive(state == GameState.Pause);
-            if (hudPanel != null)   hudPanel.SetActive(state == GameState.Run || state == GameState.Pause);
+            if (pausePanel != null) pausePanel.SetActive(state == GameState.Paused);
+            if (hudPanel != null)   hudPanel.SetActive(state == GameState.Playing || state == GameState.Paused);
         }
 
         public void ToggleInventory()

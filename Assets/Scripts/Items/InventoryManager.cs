@@ -114,7 +114,7 @@ namespace Game.Items
                 // Спец-эффект при подборе (ТЗ §3 — onPickupEffect).
                 RelicEffectHandler.Trigger(r.onPickupEffect, r);
                 // Реликвия меняет статы → пересчёт.
-                var stats = Object.FindFirstObjectByType<Player.PlayerStats>();
+                var stats = ServiceLocator.Get<Player.PlayerStats>(); // ТЗ §6 — развязка
                 stats?.Recompute();
             }
             return true;

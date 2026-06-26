@@ -53,7 +53,7 @@ namespace Enemy
                     if ((roles & r) != 0) Bucket(r).Add(e);
             }
 
-            var p = GameObject.FindGameObjectWithTag("Player");
+            var p = Game.Core.PlayerRef.Resolve();
             if (p != null) _player = p.transform;
 
             foreach (var s in Rules)

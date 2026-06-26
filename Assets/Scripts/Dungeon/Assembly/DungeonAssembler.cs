@@ -55,6 +55,9 @@ namespace Game.Dungeon
 
         public System.Action<int> OnFloorAssembled; // floorNumber
 
+        void Awake()  => Game.Core.ServiceLocator.Register(this);     // ТЗ §6 — развязка
+        void OnDestroy() => Game.Core.ServiceLocator.Unregister(this);
+
         void Start() { if (assembleOnStart) Assemble(); }
 
         public void AdvanceFloor()

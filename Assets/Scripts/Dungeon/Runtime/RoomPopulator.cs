@@ -34,6 +34,9 @@ namespace Game.Dungeon
         [Tooltip("Шанс, что враг получит эволюцию-ярость на <50% HP")]
         [Range(0f, 1f)] [SerializeField] float evolveChance = 0.1f;
 
+        void Awake()  => Game.Core.ServiceLocator.Register(this);     // ТЗ §6 — развязка
+        void OnDestroy() => Game.Core.ServiceLocator.Unregister(this);
+
         /// <summary>Заселить одну комнату. Возвращает список заспавненных врагов.</summary>
         public List<GameObject> PopulateRoom(RoomInstance room, FloorConfig cfg, int floor)
         {

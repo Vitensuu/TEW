@@ -1,4 +1,5 @@
 using UnityEngine;
+using Game.Core;
 using Game.Data;
 
 namespace Game.Items
@@ -18,11 +19,11 @@ namespace Game.Items
             switch (effectId)
             {
                 case "heal_on_pickup":
-                    Object.FindFirstObjectByType<PlayerHealth>()?.Heal(50f);
+                    ServiceLocator.Get<PlayerHealth>()?.Heal(50f); // ТЗ §6 — развязка
                     break;
 
                 case "full_heal":
-                    var hp = Object.FindFirstObjectByType<PlayerHealth>();
+                    var hp = ServiceLocator.Get<PlayerHealth>();
                     if (hp != null) hp.Heal(hp.MaxHp);
                     break;
 

@@ -29,8 +29,8 @@ namespace Game.UI
 
         void Start()
         {
-            _hp = FindFirstObjectByType<PlayerHealth>();
-            _mp = FindFirstObjectByType<PlayerMana>();
+            _hp = ServiceLocator.Get<PlayerHealth>(); // ТЗ §6 — развязка
+            _mp = ServiceLocator.Get<PlayerMana>();
 
             if (_hp != null)
             {

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using Game.Core;
 
 public class PlayerMana : MonoBehaviour
 {
@@ -11,7 +12,13 @@ public class PlayerMana : MonoBehaviour
 
     public UnityEvent<float> OnMpChanged; // 0..1 normalized
 
-    void Awake()  => CurrentMp = maxMp;
+    void Awake()
+    {
+        CurrentMp = maxMp;
+        ServiceLocator.Register(this); // ТЗ §6 — развязка вместо FindObjectOfType
+    }
+
+    void OnDestroy() => ServiceLocator.Unregister(this);
 
     void Update()
     {

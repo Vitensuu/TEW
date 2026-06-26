@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Game.Core;
 
 /// <summary>
 /// Повесь на Image-объект "bar" (тот у которого Image Type = Filled).
@@ -17,7 +18,7 @@ public class HpBarFill : MonoBehaviour
 
     void Start()
     {
-        var ph = FindFirstObjectByType<PlayerHealth>();
+        var ph = ServiceLocator.Get<PlayerHealth>(); // ТЗ §6 — развязка
         if (ph != null)
         {
             ph.OnHpChanged.AddListener(SetFill);

@@ -24,7 +24,7 @@ namespace Enemy
 
         void Start()
         {
-            var p = GameObject.FindGameObjectWithTag("Player");
+            var p = Game.Core.PlayerRef.Resolve();
             if (p != null) _player = p.transform;
             _t = buildInterval;
         }

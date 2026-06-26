@@ -20,13 +20,19 @@ namespace Game.Core
                 return;
             }
             Instance = (T)this;
+            // Регистрируем менеджер в сервис-локаторе (ТЗ §6 — развязка зависимостей).
+            ServiceLocator.Register((T)this);
             if (persistAcrossScenes && transform.parent == null)
                 DontDestroyOnLoad(gameObject);
         }
 
         protected virtual void OnDestroy()
         {
-            if (Instance == this) Instance = null;
+            if (Instance == this)
+            {
+                ServiceLocator.Unregister((T)this);
+                Instance = null;
+            }
         }
     }
 }

@@ -3,13 +3,16 @@ using UnityEngine;
 namespace Game.Core
 {
     /// <summary>
-    /// Гарантирует наличие персистентных менеджеров (ТЗ §2 — Core).
+    /// Точка сборки персистентных менеджеров (ТЗ §4-5 — Bootstrap, ServiceLocator).
     /// Положи ОДИН объект с этим компонентом в стартовую сцену (MainMenu).
-    /// Если менеджеры не назначены префабами — создаёт пустые GameObject с нужными
-    /// компонентами. Все они DontDestroyOnLoad (см. Singleton).
+    /// Создаёт/находит глобальные менеджеры (DontDestroyOnLoad), которые
+    /// сами регистрируются в ServiceLocator (см. Singleton).
+    ///
+    /// Делает только глобальный слой. Привязку к конкретной сцене (Player, Room*,
+    /// UI-панели) выполняет SceneBootstrap.
     /// </summary>
     [DefaultExecutionOrder(-1000)]
-    public class Bootstrap : MonoBehaviour
+    public class GameBootstrap : MonoBehaviour
     {
         [Tooltip("Префаб с GameManager (опц.). Если пусто — создаётся автоматически.")]
         [SerializeField] GameObject gameManagerPrefab;
@@ -17,8 +20,13 @@ namespace Game.Core
         [SerializeField] GameObject audioManagerPrefab;
         [SerializeField] GameObject inventoryManagerPrefab;
 
+        static bool _booted;
+
         void Awake()
         {
+            if (_booted) { Destroy(gameObject); return; }
+            _booted = true;
+
             EnsureManager<GameManager>(gameManagerPrefab, "GameManager");
             EnsureManager<Game.Save.SaveSystem>(saveSystemPrefab, "SaveSystem");
             EnsureManager<Game.Audio.AudioManager>(audioManagerPrefab, "AudioManager");

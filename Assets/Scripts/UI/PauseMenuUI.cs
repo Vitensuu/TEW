@@ -6,7 +6,7 @@ namespace Game.UI
 {
     /// <summary>
     /// Меню паузы (ТЗ §6 — PauseMenu): продолжить, настройки, выход в меню.
-    /// Активируется/прячется UIManager по GameState.Pause.
+    /// Активируется/прячется UIManager по GameState.Paused.
     /// </summary>
     public class PauseMenuUI : MonoBehaviour
     {
@@ -18,10 +18,10 @@ namespace Game.UI
 
         void Start()
         {
-            resumeButton?.onClick.AddListener(() => GameManager.Instance?.SetState(GameState.Run));
+            resumeButton?.onClick.AddListener(() => GameManager.Instance?.SetState(GameState.Playing));
             menuButton?.onClick.AddListener(() =>
             {
-                GameManager.Instance?.SetState(GameState.Menu);
+                GameManager.Instance?.SetState(GameState.MainMenu);
                 SceneLoader.Load(SceneLoader.MainMenu);
             });
 

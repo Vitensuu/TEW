@@ -69,7 +69,7 @@ namespace Enemy
 
         protected virtual void Start()
         {
-            var p = GameObject.FindGameObjectWithTag("Player");
+            var p = Game.Core.PlayerRef.Resolve();
             if (p != null) Player = p.transform;
         }
 
@@ -82,7 +82,7 @@ namespace Enemy
             // ищем лениво, пока не появится.
             if (Player == null)
             {
-                var p = GameObject.FindGameObjectWithTag("Player");
+                var p = Game.Core.PlayerRef.Resolve();
                 if (p == null) return;
                 Player = p.transform;
             }

@@ -23,8 +23,10 @@ namespace Game.Dungeon
         {
             base.Awake();
             if (Instance != this) return;
-            if (assembler == null) assembler = FindFirstObjectByType<DungeonAssembler>();
-            if (populator == null) populator = FindFirstObjectByType<RoomPopulator>();
+            // ТЗ §6 — сначала сервис-локатор, Find остаётся лишь крайним фолбэком
+            // на случай неопределённого порядка Awake между компонентами сцены.
+            if (assembler == null) assembler = ServiceLocator.Get<DungeonAssembler>() ?? FindFirstObjectByType<DungeonAssembler>();
+            if (populator == null) populator = ServiceLocator.Get<RoomPopulator>()   ?? FindFirstObjectByType<RoomPopulator>();
             if (assembler != null) assembler.OnFloorAssembled += OnFloorAssembled;
         }
 
