@@ -13,6 +13,11 @@ namespace Game.Core
     /// </summary>
     public static class EventBus
     {
+        // Сброс подписок при старте Play: в Editor без Reload Domain статические
+        // события хранят делегаты прошлой сессии (уничтоженные объекты → исключения).
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetOnPlay() => Clear();
+
         // ── Жизненный цикл забега ──────────────────────────────────────────────
         public static event Action OnPlayerDeath;
         public static event Action<int> OnFloorComplete;   // floorNumber

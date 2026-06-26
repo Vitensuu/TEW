@@ -11,6 +11,10 @@ namespace Game.Core
     {
         public static Transform Transform { get; private set; }
 
+        // Сброс статики при старте Play (Editor без Reload Domain хранит её между сессиями).
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetOnPlay() => Transform = null;
+
         public static GameObject GameObject => Transform != null ? Transform.gameObject : null;
 
         public static bool Exists => Transform != null;

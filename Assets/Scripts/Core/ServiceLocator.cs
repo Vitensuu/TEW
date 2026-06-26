@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Game.Core
 {
@@ -15,6 +16,11 @@ namespace Game.Core
     public static class ServiceLocator
     {
         static readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
+
+        // В Editor статика переживает выход из Play (если выключен Reload Domain).
+        // Чистим реестр при старте игры, чтобы не остались ссылки на уничтоженные объекты.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetOnPlay() => _services.Clear();
 
         public static void Register<T>(T service) where T : class
         {

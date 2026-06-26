@@ -20,13 +20,9 @@ namespace Game.Core
         [SerializeField] GameObject audioManagerPrefab;
         [SerializeField] GameObject inventoryManagerPrefab;
 
-        static bool _booted;
-
         void Awake()
         {
-            if (_booted) { Destroy(gameObject); return; }
-            _booted = true;
-
+            // Дедуп обеспечивает сам Singleton<T> (повторные менеджеры самоуничтожаются).
             EnsureManager<GameManager>(gameManagerPrefab, "GameManager");
             EnsureManager<Game.Save.SaveSystem>(saveSystemPrefab, "SaveSystem");
             EnsureManager<Game.Audio.AudioManager>(audioManagerPrefab, "AudioManager");
