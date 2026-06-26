@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 using Game.Core;
+using Game.Data;
 
 /// <summary>
 /// Здоровье игрока (реализует IDamageable — ТЗ §5).

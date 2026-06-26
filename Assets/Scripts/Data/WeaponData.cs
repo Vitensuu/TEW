@@ -15,7 +15,7 @@ namespace Game.Data
 
         public WeaponType    weaponType    = WeaponType.Melee;
         public AttackPattern attackPattern = AttackPattern.Single;
-        public Game.Core.DamageType damageType = Game.Core.DamageType.Physical;
+        public Game.Data.DamageType damageType = Game.Data.DamageType.Physical;
 
         [Tooltip("Только для Ranged/Magic — снаряд")]
         public GameObject projectilePrefab;

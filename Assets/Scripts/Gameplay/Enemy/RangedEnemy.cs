@@ -1,6 +1,7 @@
 using UnityEngine;
 using Game.Combat;
 using Game.Core;
+using Game.Data;
 
 namespace Enemy
 {

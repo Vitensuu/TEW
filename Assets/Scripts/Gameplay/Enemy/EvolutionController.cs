@@ -61,9 +61,9 @@ namespace Enemy
         void OnEnable()  => EventBus.OnEnemyKilled += OnAllyKilled;
         void OnDisable() => EventBus.OnEnemyKilled -= OnAllyKilled;
 
-        void OnAllyKilled(EnemyBase e)
+        void OnAllyKilled(Game.Core.IEnemy e)
         {
-            if (e != null && e != _eb) _allyDeaths++;
+            if (e != null && !ReferenceEquals(e, _eb)) _allyDeaths++;
         }
 
         void Update()

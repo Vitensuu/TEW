@@ -1,4 +1,4 @@
-namespace Game.Core
+namespace Game.Data
 {
     /// <summary>
     /// Тип урона. Используется в формуле боя для elementalMod и статус-эффектов

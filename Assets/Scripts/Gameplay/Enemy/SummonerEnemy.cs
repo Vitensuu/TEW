@@ -78,7 +78,7 @@ namespace Enemy
         }
 
         // Уязвимость в момент призыва (ТЗ §4): умножаем входящий урон.
-        public override void TakeDamage(float amount, Game.Core.DamageType type = Game.Core.DamageType.Physical)
+        public override void TakeDamage(float amount, Game.Data.DamageType type = Game.Data.DamageType.Physical)
         {
             if (_isSummoning) amount *= vulnerabilityMultiplier;
             base.TakeDamage(amount, type);

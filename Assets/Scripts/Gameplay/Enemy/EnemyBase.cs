@@ -18,7 +18,7 @@ namespace Enemy
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Animator))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class EnemyBase : MonoBehaviour, IDamageable
+    public class EnemyBase : MonoBehaviour, IDamageable, IEnemy
     {
         [Header("Данные (опционально — переопределяют поля ниже)")]
         [SerializeField] protected EnemyData data;

@@ -20,7 +20,7 @@ namespace Game.Core
 
         // ── Бой / лут ──────────────────────────────────────────────────────────
         public static event Action<ItemData> OnItemPickup;
-        public static event Action<Enemy.EnemyBase> OnEnemyKilled;
+        public static event Action<IEnemy> OnEnemyKilled;   // ТЗ §11 — IEnemy, не EnemyBase (разрыв цикла)
         public static event Action<int> OnGoldChanged;          // newTotal
         public static event Action<int> OnSoulShardsChanged;    // newTotal (мета-валюта)
 
@@ -32,7 +32,7 @@ namespace Game.Core
         public static void TriggerFloorComplete(int f)       => OnFloorComplete?.Invoke(f);
         public static void TriggerFloorGenerated(int f)      => OnFloorGenerated?.Invoke(f);
         public static void TriggerItemPickup(ItemData item)  => OnItemPickup?.Invoke(item);
-        public static void TriggerEnemyKilled(Enemy.EnemyBase e) => OnEnemyKilled?.Invoke(e);
+        public static void TriggerEnemyKilled(IEnemy e)      => OnEnemyKilled?.Invoke(e);
         public static void TriggerGoldChanged(int total)     => OnGoldChanged?.Invoke(total);
         public static void TriggerSoulShardsChanged(int t)   => OnSoulShardsChanged?.Invoke(t);
         public static void TriggerDamageDealt(UnityEngine.Vector3 pos, float amount, bool crit)
