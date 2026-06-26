@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Game.Save;
 
 namespace Game.Core
@@ -29,13 +30,22 @@ namespace Game.Core
             if (Instance != this) return;
             EventBus.OnPlayerDeath += HandlePlayerDeath;
             EventBus.OnFloorComplete += HandleFloorComplete;
+            SceneManager.sceneLoaded += HandleSceneLoaded;
         }
 
         protected override void OnDestroy()
         {
             EventBus.OnPlayerDeath -= HandlePlayerDeath;
             EventBus.OnFloorComplete -= HandleFloorComplete;
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
             base.OnDestroy();
+        }
+
+        // Если загрузилась игровая сцена во время Loading — переходим в Playing.
+        // Делает переход надёжным даже без SceneBootstrap в сцене (ТЗ §8).
+        void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (State == GameState.Loading) SetState(GameState.Playing);
         }
 
         // ── Управление состоянием ───────────────────────────────────────────────
